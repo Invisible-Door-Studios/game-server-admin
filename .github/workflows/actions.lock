@@ -57,7 +57,7 @@ workflows:
         - 'erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124'
 dependencies:
     'actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8':
-        ref: '4d101475d8b20a2381f78447822ac1eab6504dd8'
+        ref: 'v4.2.2'
         commit: 'sha1-4d101475d8b20a2381f78447822ac1eab6504dd8'
         owner_id: 44036562
         repo_id: 760702757
@@ -69,22 +69,22 @@ dependencies:
         owner_id: 44036562
         repo_id: 760701061
     'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9':
-        ref: '55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
+        ref: 'v6.1.0'
         commit: 'sha1-55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
         owner_id: 44036562
         repo_id: 215566462
     'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1':
-        ref: '3d3c42e5aac5ba805825da76410c181273ba90b1'
+        ref: 'v7.0.1'
         commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
         owner_id: 44036562
         repo_id: 197814629
     'actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d':
-        ref: '45bfe0192ca1faeb007ade9deae92b16b8254a0d'
+        ref: 'v6.0.0'
         commit: 'sha1-45bfe0192ca1faeb007ade9deae92b16b8254a0d'
         owner_id: 44036562
         repo_id: 513659658
     'actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346':
-        ref: '368f82528645a54fb793d4d04e342629a3f51346'
+        ref: 'v5.0.1'
         commit: 'sha1-368f82528645a54fb793d4d04e342629a3f51346'
         owner_id: 44036562
         repo_id: 438112499
@@ -94,7 +94,7 @@ dependencies:
         owner_id: 44036562
         repo_id: 192626254
     'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3':
-        ref: '3a2844b7e9c422d3c10d287c895573f7108da1b3'
+        ref: 'v9.0.0'
         commit: 'sha1-3a2844b7e9c422d3c10d287c895573f7108da1b3'
         owner_id: 44036562
         repo_id: 205262760
@@ -109,14 +109,14 @@ dependencies:
         owner_id: 44036562
         repo_id: 192625955
     'actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9':
-        ref: 'fc324d3547104276b827a68afc52ff2a11cc49c9'
+        ref: 'v5.0.0'
         commit: 'sha1-fc324d3547104276b827a68afc52ff2a11cc49c9'
         owner_id: 44036562
         repo_id: 496012378
         uses:
             - 'actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f'
     'erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124':
-        ref: '54075bcc5e249e4758d363f27d099f55d843f124'
+        ref: 'v1.24.1'
         commit: 'sha1-54075bcc5e249e4758d363f27d099f55d843f124'
         owner_id: 47606891
         repo_id: 331103973
@@ -126,12 +126,12 @@ dependencies:
         owner_id: 9919
         repo_id: 259445878
     'hyperpolymath/deed-ecosystem@3e69929a4b0b5610b477732ee125a156cbc8a040':
-        ref: '3e69929a4b0b5610b477732ee125a156cbc8a040'
+        ref: 'main'
         commit: 'sha1-3e69929a4b0b5610b477732ee125a156cbc8a040'
         owner_id: 6759885
         repo_id: 1275649586
     'hyperpolymath/k9-ecosystem@20f6be5b5a14a48680b236955b5c4ad9033d00d4':
-        ref: '20f6be5b5a14a48680b236955b5c4ad9033d00d4'
+        ref: 'main'
         commit: 'sha1-20f6be5b5a14a48680b236955b5c4ad9033d00d4'
         owner_id: 6759885
         repo_id: 1275650185
