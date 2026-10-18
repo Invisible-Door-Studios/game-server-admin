@@ -9,6 +9,8 @@
 
 const std = @import("std");
 
+/// Configure library, CLI, benchmark, test, and cross-compilation build steps.
+/// Unit and fuzz test runs use the repository root to read checked-in fixtures.
 pub fn build(b: *std.Build) void {
     // ---------------------------------------------------------------
     // Default target / optimisation from CLI flags
