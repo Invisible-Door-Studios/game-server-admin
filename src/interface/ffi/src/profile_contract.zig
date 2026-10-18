@@ -467,9 +467,9 @@ fn isFieldKey(value: []const u8) bool {
     return true;
 }
 
-const SOP_PROFILE = @embedFile("../../../../fixtures/standard-operating-psychopathy/profile.v0.1.json");
-const SOP_CONFIG = @embedFile("../../../../fixtures/standard-operating-psychopathy/config.sample.fixture.json");
-const SOP_STATUS = @embedFile("../../../../fixtures/standard-operating-psychopathy/session-summary.fixture.json");
+const SOP_PROFILE = @embedFile("sop_profile");
+const SOP_CONFIG = @embedFile("sop_config");
+const SOP_STATUS = @embedFile("sop_status");
 
 fn testConfig(
     allocator: Allocator,

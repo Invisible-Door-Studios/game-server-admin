@@ -47,6 +47,7 @@ pub fn build(b: *std.Build) void {
         .version = .{ .major = 0, .minor = 9, .patch = 0 },
     });
 
+    addProfileFixtures(b, lib.root_module);
     b.installArtifact(lib);
 
     // ---------------------------------------------------------------
@@ -61,6 +62,7 @@ pub fn build(b: *std.Build) void {
             .link_libc = true,
         }),
     });
+    addProfileFixtures(b, exe.root_module);
     b.installArtifact(exe);
 
     const run_exe = b.addRunArtifact(exe);
@@ -84,6 +86,7 @@ pub fn build(b: *std.Build) void {
             .link_libc = true,
         }),
     });
+    addProfileFixtures(b, lib_static.root_module);
     b.installArtifact(lib_static);
 
     // ---------------------------------------------------------------
@@ -98,6 +101,7 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
+    addProfileFixtures(b, unit_tests.root_module);
     const run_unit_tests = b.addRunArtifact(unit_tests);
     const test_step = b.step("test", "Run unit tests for all FFI modules");
     test_step.dependOn(&run_unit_tests.step);
@@ -112,6 +116,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .link_libc = true,
     });
+    addProfileFixtures(b, src_module);
 
     // ---------------------------------------------------------------
     // Integration tests
@@ -218,6 +223,8 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
 
+    addProfileFixtures(b, fuzz_mod);
+
     const fuzz_tests = b.addTest(.{
         .root_module = fuzz_mod,
     });
@@ -236,6 +243,8 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .link_libc = true,
     });
+
+    addProfileFixtures(b, cli_mod);
 
     const cli_tests = b.addTest(.{
         .root_module = cli_mod,
@@ -291,8 +300,22 @@ pub fn build(b: *std.Build) void {
             .version = .{ .major = 0, .minor = 9, .patch = 0 },
         });
 
+        addProfileFixtures(b, cross_lib.root_module);
         const install_cross = b.addInstallArtifact(cross_lib, .{});
         const cross_step = b.step(entry[0], entry[1]);
         cross_step.dependOn(&install_cross.step);
     }
+}
+
+// Named imports let tests embed repository fixtures outside the src module root.
+fn addProfileFixtures(b: *std.Build, module: *std.Build.Module) void {
+    module.addAnonymousImport("sop_profile", .{
+        .root_source_file = b.path("../../../fixtures/standard-operating-psychopathy/profile.v0.1.json"),
+    });
+    module.addAnonymousImport("sop_config", .{
+        .root_source_file = b.path("../../../fixtures/standard-operating-psychopathy/config.sample.fixture.json"),
+    });
+    module.addAnonymousImport("sop_status", .{
+        .root_source_file = b.path("../../../fixtures/standard-operating-psychopathy/session-summary.fixture.json"),
+    });
 }
