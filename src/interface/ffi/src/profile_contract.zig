@@ -180,14 +180,18 @@ pub fn projectFixtureStatus(
         });
     }
 
+    const owned_profile_id = try owned.dupe(u8, profileId(profile.parsed.value) orelse return error.InvalidProfileDescriptor);
+    const owned_capability_id = try owned.dupe(u8, capability_id);
+    const owned_capability_version = try owned.dupe(u8, capability_version);
+    const owned_fields = try projected.toOwnedSlice(owned);
     return .{
         .arena = arena,
         .source = "fixture",
         .connected = false,
-        .profile_id = try owned.dupe(u8, profileId(profile.parsed.value) orelse return error.InvalidProfileDescriptor),
-        .capability_id = try owned.dupe(u8, capability_id),
-        .capability_version = try owned.dupe(u8, capability_version),
-        .fields = try projected.toOwnedSlice(owned),
+        .profile_id = owned_profile_id,
+        .capability_id = owned_capability_id,
+        .capability_version = owned_capability_version,
+        .fields = owned_fields,
     };
 }
 
@@ -542,9 +546,15 @@ fn isFieldKey(value: []const u8) bool {
     return true;
 }
 
-const SOP_PROFILE = @embedFile("sop_profile");
-const SOP_CONFIG = @embedFile("sop_config");
-const SOP_STATUS = @embedFile("sop_status");
+const SOP_PROFILE_PATH = "fixtures/standard-operating-psychopathy/profile.v0.1.json";
+const SOP_CONFIG_PATH = "fixtures/standard-operating-psychopathy/config.sample.fixture.json";
+const SOP_STATUS_PATH = "fixtures/standard-operating-psychopathy/session-summary.fixture.json";
+
+/// Test-only fixture I/O. The unit-test run step is rooted at the repository
+/// root; runtime reads avoid embedding files outside Zig's package path.
+fn readSopFixture(allocator: Allocator, path: []const u8) ![]u8 {
+    return std.fs.cwd().readFileAlloc(allocator, path, 1024 * 1024);
+}
 
 fn testConfig(
     allocator: Allocator,
@@ -562,14 +572,20 @@ fn testConfig(
 
 test "SOP profile and sample configuration validate as a fixture" {
     const allocator = std.testing.allocator;
-    var profile = try parseProfile(allocator, SOP_PROFILE);
+    const profile_json = try readSopFixture(allocator, SOP_PROFILE_PATH);
+    defer allocator.free(profile_json);
+    var profile = try parseProfile(allocator, profile_json);
     defer profile.deinit();
-    try validateFixtureConfiguration(allocator, &profile, SOP_CONFIG);
+    const config_json = try readSopFixture(allocator, SOP_CONFIG_PATH);
+    defer allocator.free(config_json);
+    try validateFixtureConfiguration(allocator, &profile, config_json);
 }
 
 test "configuration validation covers supplied combinations, opaque policies, and optional UMS references" {
     const allocator = std.testing.allocator;
-    var profile = try parseProfile(allocator, SOP_PROFILE);
+    const profile_json = try readSopFixture(allocator, SOP_PROFILE_PATH);
+    defer allocator.free(profile_json);
+    var profile = try parseProfile(allocator, profile_json);
     defer profile.deinit();
 
     const combinations = [_]struct { mode: []const u8, capacity: i64, pacing: []const u8, world_policy_id: []const u8 }{
@@ -587,7 +603,9 @@ test "configuration validation covers supplied combinations, opaque policies, an
 
 test "configuration validator rejects out-of-range, unknown, missing, and mistyped values" {
     const allocator = std.testing.allocator;
-    var profile = try parseProfile(allocator, SOP_PROFILE);
+    const profile_json = try readSopFixture(allocator, SOP_PROFILE_PATH);
+    defer allocator.free(profile_json);
+    var profile = try parseProfile(allocator, profile_json);
     defer profile.deinit();
 
     const too_few = try testConfig(allocator, "co-op", 3, "continuous", "fixture.world-advance.test");
@@ -609,17 +627,21 @@ test "configuration validator rejects out-of-range, unknown, missing, and mistyp
 
 test "fixture status projection is audience-filtered and explicitly disconnected" {
     const allocator = std.testing.allocator;
-    var profile = try parseProfile(allocator, SOP_PROFILE);
+    const profile_json = try readSopFixture(allocator, SOP_PROFILE_PATH);
+    defer allocator.free(profile_json);
+    var profile = try parseProfile(allocator, profile_json);
     defer profile.deinit();
+    const status_json = try readSopFixture(allocator, SOP_STATUS_PATH);
+    defer allocator.free(status_json);
 
-    var operator_view = try projectFixtureStatus(allocator, &profile, SOP_STATUS, .operator);
+    var operator_view = try projectFixtureStatus(allocator, &profile, status_json, .operator);
     defer operator_view.deinit();
     try std.testing.expectEqualStrings("fixture", operator_view.source);
     try std.testing.expect(!operator_view.connected);
     try std.testing.expectEqualStrings("standard-operating-psychopathy", operator_view.profile_id);
     try std.testing.expectEqual(@as(usize, 6), operator_view.fields.len);
 
-    var player_view = try projectFixtureStatus(allocator, &profile, SOP_STATUS, .player);
+    var player_view = try projectFixtureStatus(allocator, &profile, status_json, .player);
     defer player_view.deinit();
     try std.testing.expectEqual(@as(usize, 1), player_view.fields.len);
     try std.testing.expectEqualStrings("package_version", player_view.fields[0].key);
@@ -722,7 +744,9 @@ test "integer fields accept integral JSON numbers and reject fractional values" 
 
 test "fixture projector rejects connected or non-fixture status payloads" {
     const allocator = std.testing.allocator;
-    var profile = try parseProfile(allocator, SOP_PROFILE);
+    const profile_json = try readSopFixture(allocator, SOP_PROFILE_PATH);
+    defer allocator.free(profile_json);
+    var profile = try parseProfile(allocator, profile_json);
     defer profile.deinit();
 
     const live_payload =

@@ -22,6 +22,7 @@ pub const game_profiles = @import("game_profiles.zig");
 pub const profile_contract = @import("profile_contract.zig"); // draft fixture validator; not part of the C ABI or legacy registry
 
 test {
+    // Include the fixture validator's test declarations in the normal unit-test root.
     _ = @import("profile_contract.zig");
 }
 pub const groove_client = @import("groove_client.zig");
