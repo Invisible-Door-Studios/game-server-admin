@@ -19,6 +19,7 @@ pub const a2ml_emit = @import("a2ml_emit.zig");
 pub const verisimdb_client = @import("verisimdb_client.zig");
 pub const server_actions = @import("server_actions.zig");
 pub const game_profiles = @import("game_profiles.zig");
+pub const profile_contract = @import("profile_contract.zig"); // draft fixture validator; not part of the C ABI or legacy registry
 pub const groove_client = @import("groove_client.zig");
 pub const steam_client = @import("steam_client.zig");
 pub const abi_layout = @import("abi_layout.zig"); // canonical wire structs + Zig↔Idris cross-check

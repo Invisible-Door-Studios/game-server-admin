@@ -103,8 +103,9 @@ PROFILE_QUADLET[minecraft-java]="container/minecraft-java/gsa-minecraft-java.con
 PROFILE_VOLUMES[minecraft-java]="mc-java-world:/data/minecraft-java mc-java-backups:/data/backups"
 PROFILE_STEAMAPPID[minecraft-java]=""
 
-# Add further game profiles here as container/ dirs are created.
-# The long-term route is: gsa provision <id> reads profiles/<id>.a2ml directly.
+# Existing game profiles are a legacy A2ML dependency. Do not add new A2ML
+# profiles; any future generic provision route requires an approved versioned
+# contract and must preserve the game-owned server boundary.
 
 # ─── Validate profile is known ────────────────────────────────────────────────
 if [ -z "${PROFILE_CONTAINER[$PROFILE_ID]+x}" ]; then

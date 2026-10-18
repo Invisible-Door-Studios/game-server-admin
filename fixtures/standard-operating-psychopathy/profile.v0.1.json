@@ -1,0 +1,162 @@
+{
+  "$comment": "SPDX-License-Identifier: MPL-2.0",
+  "contract": {
+    "name": "gsa.game-profile",
+    "version": "0.1.0-draft"
+  },
+  "metadata": {
+    "status": "fixture-only",
+    "source": "user-supplied-design-directions; no live server contract verified"
+  },
+  "profile": {
+    "id": "standard-operating-psychopathy",
+    "name": "STANDARD OPERATING PSYCHOPATHY",
+    "kind": "design-fixture"
+  },
+  "configuration": {
+    "version": "0.1.0-draft",
+    "fields": [
+      {
+        "key": "mode",
+        "type": "enum",
+        "required": true,
+        "visibility": "player",
+        "values": ["co-op", "competitive", "co-opetitive"]
+      },
+      {
+        "key": "player_capacity",
+        "type": "integer",
+        "required": true,
+        "visibility": "player",
+        "minimum": 4,
+        "maximum": 6
+      },
+      {
+        "key": "pacing",
+        "type": "enum",
+        "required": true,
+        "visibility": "player",
+        "values": ["continuous", "hybrid"]
+      },
+      {
+        "key": "signal_binding",
+        "type": "enum",
+        "required": true,
+        "visibility": "player",
+        "values": ["non-binding"]
+      },
+      {
+        "key": "commitment_mode",
+        "type": "enum",
+        "required": true,
+        "visibility": "player",
+        "values": ["simultaneous-hidden"]
+      },
+      {
+        "key": "deadline_policy_id",
+        "type": "string",
+        "required": false,
+        "visibility": "operator",
+        "minLength": 1
+      },
+      {
+        "key": "world_advance_policy_id",
+        "type": "string",
+        "required": false,
+        "visibility": "operator",
+        "minLength": 1
+      },
+      {
+        "key": "no_response_fallback_id",
+        "type": "string",
+        "required": false,
+        "visibility": "operator",
+        "minLength": 1
+      },
+      {
+        "key": "disconnect_fallback_id",
+        "type": "string",
+        "required": false,
+        "visibility": "operator",
+        "minLength": 1
+      },
+      {
+        "key": "ums_package_id",
+        "type": "string",
+        "required": false,
+        "visibility": "operator",
+        "minLength": 1
+      },
+      {
+        "key": "ums_profile_id",
+        "type": "string",
+        "required": false,
+        "visibility": "operator",
+        "minLength": 1
+      },
+      {
+        "key": "scenario_version",
+        "type": "string",
+        "required": false,
+        "visibility": "operator",
+        "minLength": 1
+      },
+      {
+        "key": "ums_compatibility_version",
+        "type": "string",
+        "required": false,
+        "visibility": "operator",
+        "minLength": 1
+      }
+    ]
+  },
+  "capabilities": [
+    {
+      "id": "gsa.session-summary",
+      "version": "0.1.0-draft",
+      "fields": [
+        {
+          "key": "phase_id",
+          "type": "string",
+          "required": false,
+          "visibility": "operator",
+          "minLength": 1
+        },
+        {
+          "key": "player_count",
+          "type": "integer",
+          "required": false,
+          "visibility": "operator"
+        },
+        {
+          "key": "uptime_seconds",
+          "type": "integer",
+          "required": false,
+          "visibility": "operator",
+          "minimum": 0
+        },
+        {
+          "key": "health_summary",
+          "type": "string",
+          "required": false,
+          "visibility": "operator",
+          "minLength": 1
+        },
+        {
+          "key": "compatibility_version",
+          "type": "string",
+          "required": false,
+          "visibility": "operator",
+          "minLength": 1
+        },
+        {
+          "key": "package_version",
+          "type": "string",
+          "required": false,
+          "visibility": "player",
+          "minLength": 1
+        }
+      ]
+    }
+  ]
+}

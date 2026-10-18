@@ -314,18 +314,17 @@ probe host port="27015":
     # Uses the compiled FFI probe engine
     cd src/interface/ffi && zig build run -- --probe {{host}} {{port}}
 
-# Scaffold a new game profile A2ML file
+# Deprecated: current standards retire A2ML; do not scaffold new A2ML profiles.
 add-profile name:
-    @echo "Creating profiles/{{name}}.a2ml..."
-    cp profiles/valheim.a2ml profiles/{{name}}.a2ml
-    sed -i 's/valheim/{{name}}/g; s/Valheim/{{name}}/g' profiles/{{name}}.a2ml
-    @echo "Profile scaffolded — edit profiles/{{name}}.a2ml to customize"
+    @echo "Disabled: new A2ML profile scaffolding is retired. No file was created."
+    @echo "See docs/developer/GAME-PROFILE-CONTRACT.adoc for the draft/test-only boundary."
+    @exit 1
 
-# Regenerate panel clade definitions from game profiles
+# Deprecated: the old generator rewrites A2ML panel-clade descriptors.
 generate-clades:
-    @echo "Generating panel clades from profiles/*.a2ml..."
-    @bash scripts/generate-clades.sh
-    @echo "Generated $(ls -d panel-clades/gsa-game-*/ 2>/dev/null | wc -l) game profile clades"
+    @echo "Disabled: panel-clade A2ML generation is retired. No files were created."
+    @echo "Existing clades remain for compatibility; a replacement authoring format needs maintainer approval."
+    @exit 1
 
 # Start the dedicated VeriSimDB instance
 verisimdb-up:
@@ -415,8 +414,8 @@ verisimdb-deploy:
 
 # ─── Game server provisioner ──────────────────────────────────────────────────
 #
-# Schema-driven game server minter.  Reads profiles/<game>.a2ml and
-# container/<game>/ to provision a complete running server:
+# Legacy-profile game server minter. Reads existing profiles/<game>.a2ml and
+# container/<game>/ to provision a running server; do not create new A2ML profiles:
 #   build → volumes → firewall → quadlet → start → verify → register in VeriSimDB
 #
 # Usage:
@@ -425,7 +424,7 @@ verisimdb-deploy:
 #   just game-deploy GAME=cryofall DRY=1      # preview without executing
 #   just verpex-deploy GAME=cryofall          # SSH deploy to Verpex VPS
 
-# Generic game server deploy — GAME must be a profile ID (profiles/<GAME>.a2ml)
+# Existing deployment route — GAME must match an existing legacy profile ID; no new A2ML profiles
 game-deploy GAME="" DRY="0":
     #!/usr/bin/env bash
     set -euo pipefail

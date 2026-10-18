@@ -68,17 +68,16 @@ provides extraction methods that pull config files from remote hosts via
 SSH, container exec, or RCON. See `docs/developer/CONFIG-FORMATS.adoc` for
 the format-detection and parser design in depth.
 
-* `gossamer_gsa_extract_config` — extract the configuration for a
-  server/profile combination (via container exec) and return it as an
-  A2ML string.
+* `gossamer_gsa_extract_config` — extract a configuration through the
+  existing profile/container path and return the legacy A2ML-compatible
+  representation. This is not the draft JSON profile validator.
 
 === a2ml_emit.zig
 
-A2ML (Annotated Attribute Markup Language) serialisation and
-deserialisation. Converts between `ParsedConfig` structures and A2ML text,
-the canonical interchange format used by hyperpolymath projects for
-structured configuration (`@server(...): @probe(...):@end @config(...):
-@field(...): "value" @end @end @end`).
+Legacy A2ML (Annotated Attribute Markup Language) serialisation and
+deserialisation. Converts between `ParsedConfig` structures and existing
+A2ML text for compatibility. A2ML is retired by current standards and must
+not be extended as the canonical format for new game profiles or contracts.
 
 * `gossamer_gsa_a2ml_emit` — convert a JSON config representation to A2ML.
 * `gossamer_gsa_a2ml_parse` — parse A2ML back to a JSON representation.
@@ -129,18 +128,33 @@ Actions can be dispatched locally or via SSH to remote hosts.
 
 === game_profiles.zig
 
-Game profile registry. Loads, stores, and queries game profiles defined
-in A2ML files. Each profile describes a game server type: its ports,
-protocol, config format, config path, field definitions, and available
-actions. The registry is the bridge between the probing engine (which
-identifies servers) and the config extraction layer (which knows how to
-read them).
+Legacy game profile registry. Loads, stores, and queries the existing game
+profiles in A2ML files. Each describes ports, a protocol, config format/path,
+field metadata, and action text. The registry is the current bridge between
+the probing and config-extraction paths, but its metadata is not a generic
+configuration-schema validator. Keep the existing reader/corpus compatible;
+current standards prohibit adding to or extending A2ML.
 
 * `gossamer_gsa_load_profiles` — load profiles from a directory of `.a2ml`
   files; returns the count loaded.
 * `gossamer_gsa_list_profiles` — list all loaded profiles as a JSON array.
-* `gossamer_gsa_add_profile` — add a single profile from an A2ML string
-  (not a file path).
+* `gossamer_gsa_add_profile` — add a single legacy profile from an A2ML string
+  (not a file path). Do not use this endpoint to create new A2ML profiles.
+
+=== profile_contract.zig
+
+Draft JSON profile/configuration validator and fixture-status projector,
+covered by unit tests only. It checks the narrow field subset documented in
+`schemas/game-profile-draft-0.1.schema.json`, including required fields, types,
+enums, numeric/string bounds, and opaque secret references. Optional capability
+IDs are not hard-coded as a GSA game taxonomy; the fixture projector validates
+only a capability explicitly advertised by a profile and excludes `secret`
+fields from both player and operator projections.
+
+This module has no `gossamer_gsa_*` export and is not connected to the legacy
+A2ML registry, public C ABI, CLI, GUI, server-action path, persistence, or live
+network adapter. `projectFixtureStatus` rejects anything marked connected or
+not labelled `source: fixture`.
 
 === groove_client.zig
 
@@ -219,9 +233,11 @@ using the same offsets it proved.
 * `gossamer_gsa_is_null` — null check on a pointer.
 * `gossamer_gsa_free` — free a buffer previously returned by an ABI emitter
   (NULL-safe).
-* `gossamer_gsa_apply_config` — validate and accept a serialised
-  `A2MLConfig` wire struct against a live probe handle; persistence to disk
-  is delegated to `gossamer_gsa_write_server_config`.
+* `gossamer_gsa_apply_config` — legacy validation-only stub: checks the
+  handle state and a small pointer-level `serverId` invariant; it does not
+  decode, validate, or write a configuration. The Idris `applyConfig` wrapper
+  returns `UnsupportedOperation` until a typed serializer/write/read-back
+  path exists.
 * `gossamer_gsa_close_handle` — consume a probe handle. See
   <<The handle lifecycle>>.
 * `gossamer_gsa_drift_struct` — emit a `DriftReport` wire struct for a

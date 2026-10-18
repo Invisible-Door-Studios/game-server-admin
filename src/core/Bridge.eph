@@ -498,8 +498,9 @@ fn handleGrooveDriftAlert(payload: String, caps: &GsaCapSet) -> String =
 -- Profile management handler
 -- =============================================================================
 
--- Add a new game profile from A2ML text.
--- Payload: {"a2ml": "@game-profile(...): ... @end"}
+-- Legacy compatibility handler for A2ML profile registration.
+-- A2ML is retired; do not use this path for new profile authoring.
+-- Payload shape is retained for old bridge clients: {"a2ml": "..."}
 fn handleAddProfile(payload: String) -> String =
   let a2ml = jsonField(payload, "a2ml") in
   if a2ml == "" then

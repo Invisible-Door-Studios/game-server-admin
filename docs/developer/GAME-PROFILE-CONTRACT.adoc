@@ -1,0 +1,133 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+= Draft Game-Profile Contract and Fixture Boundary
+:revdate: 2026-10-18
+:status: draft, test-only; not a canonical contract
+
+[IMPORTANT]
+====
+This document describes an experimental validator slice, not a stable GSA API.
+The JSON descriptor is not loaded by the application. No live adapter, C ABI,
+GUI flow, deployment action, persistence, or server API is added. Maintainer
+approval is required before making the format canonical or migrating existing
+profiles.
+====
+
+== Why this boundary exists
+
+GSA's `game_profiles.zig` registry currently loads the existing
+`profiles/*.a2ml` corpus. That is a legacy dependency, not authority to create
+more A2ML: current `hyperpolymath/standards` guidance retires A2ML and prohibits
+creating, restoring, regenerating, or extending it. This change preserves the
+legacy reader and files unchanged while testing a separate versioned JSON
+boundary in `schemas/game-profile-draft-0.1.schema.json`. The exported
+`gossamer_gsa_add_profile` A2ML endpoint remains for compatibility but is not
+the approved authoring path; the `just add-profile` file scaffold is disabled.
+
+The SOP fixture is justified as a shape-and-privacy test case only. The
+inspected game repository currently contains a browser/local-storage game, not
+a dedicated multiplayer server or admin API. Its future multiplayer and UMS
+directions come from the supplied design brief, not a verified implementation.
+GSA therefore remains an optional external operations plane: it does not become
+a runtime dependency, simulation authority, matchmaker, or source of game rules.
+The game must remain authoritative and runnable if GSA is unavailable. The
+fixture's mode labels mirror the supplied brief; they are not asserted as
+runtime enum identifiers or accepted production defaults.
+
+== Draft data model
+
+A descriptor identifies `contract.name = gsa.game-profile` and
+`contract.version = 0.1.0-draft`; the configuration schema and each optional
+capability carry their own version. No deployment-instance contract is defined
+in this slice. If introduced, deployment-instance identity/operations should
+remain separately versioned instead of being folded into profile or session
+summary data. Configuration fields are declarative and
+support `string`, `integer`, `number`, `boolean`, `enum`, and opaque `secret-ref`
+values. Each field declares whether it is required and classifies visibility as
+`player`, `operator`, or `secret`. The validator rejects unknown submitted
+settings, missing required values, type/enum/range/length violations, duplicate
+field/capability IDs, and malformed secret references. It never resolves a
+secret reference or includes submitted values in validation errors.
+
+Capabilities are optional, versioned descriptors. The validator does not
+require any capability ID, does not assign meaning to unknown IDs, and accepts
+unknown versioned capabilities when their field declarations use the supported
+generic subset. A consumer must explicitly request a capability; absence is
+reported as `CapabilityNotAdvertised`, not treated as an error in the profile.
+
+The `gsa.session-summary` capability in the SOP fixture is likewise optional.
+It declares coarse, optional fields only: a game-reported opaque phase ID,
+player count, uptime, health summary, and compatibility/package versions. GSA
+does not define phase names or lifecycle semantics. Private orders,
+negotiation, signals, and per-player fallback decisions are not part of the
+fixture summary.
+
+== Fixture validation and status projection
+
+`profile_contract.zig` is imported as a test helper but exports no
+`gossamer_gsa_*` symbol. It currently provides:
+
+* `parseProfile` and `validateConfiguration` for the supported draft subset;
+* `validateFixtureConfiguration` for a JSON envelope marked
+  `source: fixture` and `connected: false`;
+* `projectFixtureStatus`, which accepts only an explicitly disconnected fixture
+  envelope and an advertised capability/version.
+
+The projected status object copies only audience-authorized scalar fields. A
+player view includes `player` fields; an operator view includes `player` and
+`operator` fields; `secret` fields are copied to neither view. The source JSON
+is not retained by the returned view. This is a small safety property for the
+fixture, not authentication or authorization. There is no live diagnostics
+route, session-data storage, retention period, or audit trail here. Detailed
+session diagnostics must remain out of ordinary health/public views until
+maintainers and the game owner define explicit authorization, sensitivity,
+retention, and audit rules.
+
+The fixture envelope in `fixtures/standard-operating-psychopathy/` is labelled
+and disconnected. It contains no timer value or numeric deadline field:
+deadlines are represented only by an opaque policy identifier until the game
+owner and maintainers define a versioned meaning. The opaque `*_policy_id` values carry no GSA-defined fallback semantics. UMS
+package/profile/scenario reference fields are optional and opaque; GSA does not
+require UMS, resolve compatibility, compile content, or load packages. UMS
+remains the authoring, validation, packaging, and versioned-content authority.
+
+== Verification covered by the draft
+
+The Zig tests exercise:
+
+* the supplied sample configuration and combinations of the supplied mode
+  labels, capacities at 4/5/6, continuous/hybrid pacing, and opaque deadline
+  and world-advance policy IDs;
+* rejection of out-of-range player capacities, invalid modes, missing required
+  fields, unknown keys, and wrong types;
+* opaque secret-reference shape validation without resolving or accepting
+  inline secret values;
+* fixture-only/disconnected status, player versus operator projection, and
+  omission of a synthetic secret canary;
+* an unknown optional capability and a profile with no capabilities.
+
+On 2026-10-18, the local Zig 0.15.2 format/build/unit/integration/smoke
+checks passed, as did Draft 2020-12 schema meta-validation and SOP profile
+validation. Full GitHub CI, live integration, and compatibility with an actual
+SOP server remain unverified. Existing A2ML parser/registry behavior is
+intentionally unchanged; its existing tests remain the compatibility guard.
+
+== Decisions still requiring maintainers
+
+. Whether JSON Schema (and this supported subset) is the right serialization
+  and validation technology, and where the canonical contract should live.
+. Independent versioning rules and ownership for profile, deployment-instance,
+  configuration, and optional session/capability contracts, plus the process for
+  approving/migrating legacy profiles. No A2ML files are rewritten here.
+. Whether game-owned rules need different policy identifiers or additional
+  fields for signals, commitments, timeouts, reconnects, and pause behavior;
+  no operational defaults or final timer values are chosen.
+. The interpretation and compatibility authority for UMS package/profile and
+  scenario references. GSA performs no compatibility decision in this slice.
+. Any live session-summary adapter contract, including authorization, data
+  sensitivity/visibility, retention, and audit requirements.
+. Any real server operations contract: protocol/ports, installation/update,
+  lifecycle, backup, and offline behavior must come from the game owner.
+
+See the link:../reports/quality/2026-10-18-game-profile-recon.adoc[recon report]
+for the repository/standards/CI findings behind this proposal.

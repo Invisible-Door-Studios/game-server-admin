@@ -1,1 +1,5 @@
-= Quality Reports
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+= Quality and Recon Reports
+
+* link:2026-10-18-game-profile-recon.adoc[2026-10-18 game-profile recon] — standards/implementation/CI recon and a reversible fixture-only proposal; status: not an accepted contract.

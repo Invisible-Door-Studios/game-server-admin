@@ -4,8 +4,11 @@
 
 ## Quick Context
 
-Universal game server probe, config management, and administration tool.
-Gossamer GUI + Zig FFI + Idris2 ABI + VeriSimDB backing store.
+Game-server discovery, configuration management, and administration tool,
+intended to remain game-neutral and an optional external operations plane—not
+game runtime/simulation authority or a matchmaker. Gossamer GUI + Zig FFI +
+Idris2 ABI + VeriSimDB backing store. The existing 18-profile registry is
+legacy; the new JSON validator is fixture/test-only, not production integration.
 
 ## Build & Test
 
@@ -43,7 +46,7 @@ panic-attack assail .
 ```
 Gossamer GUI (Ephapax .eph)        -- src/core/, src/gui/panels/
     |  IPC (gossamer:// protocol)
-Zig FFI (libgsa.so + gsa CLI)     -- src/interface/ffi/src/ (13 modules)
+Zig FFI (libgsa.so + gsa CLI)     -- src/interface/ffi/src/ (14 modules)
     |  C ABI (18 result codes)
 Idris2 ABI (Types/Foreign/Layout)  -- src/interface/abi/
     |  REST (port 8090)
@@ -60,7 +63,8 @@ VeriSimDB (8-modality octads)      -- container/verisimdb/
 | `a2ml_emit.zig` | A2ML serialisation + parsing + config diff |
 | `verisimdb_client.zig` | VeriSimDB HTTP client (Zig 0.15 fetch API) |
 | `server_actions.zig` | Start/stop/restart/logs via Podman/Docker/systemd |
-| `game_profiles.zig` | A2ML profile registry + parser |
+| `game_profiles.zig` | Legacy A2ML profile registry + parser (existing corpus only) |
+| `profile_contract.zig` | Draft fixture-only JSON validator/projection; no public ABI or live adapter |
 | `groove_client.zig` | .well-known Groove voice alerting |
 | `abi_layout.zig` | Canonical C-ABI `extern struct`s + comptime Zig↔Idris layout cross-check |
 | `abi_serde.zig` | Binary ABI emitters + offset readers (`read_int`/`read_ptr`/…) — makes `Layout.idr` offsets a live contract |
@@ -75,9 +79,11 @@ VeriSimDB (8-modality octads)      -- container/verisimdb/
 
 - **All exported FFI functions** are prefixed `gossamer_gsa_` and use `pub export fn ... callconv(.c)`
 - **Result codes** are contractual — must match `src/interface/abi/Types.idr`
-- **Secrets** must be redacted as `[REDACTED]` in A2ML output and octad JSON
-- **Machine-readable metadata** lives in `.machine_readable/` ONLY (never root)
-- **Game profiles** are A2ML files in `profiles/` — support quoted AND unquoted attribute values
+- **Config secrets** marked secret are redacted by the existing A2ML emitter; that is not a session-data privacy policy. Never expose hidden orders, negotiation, signals, or per-player decisions in ordinary views.
+- **Machine-readable metadata** lives in `.machine_readable/` ONLY (never root); follow current standards for new metadata/contracts.
+- **Game profiles**: `profiles/*.a2ml` is a legacy runtime dependency. Current standards retire A2ML: do not create, restore, regenerate, or extend it. Keep existing files readable and do not claim migration is complete.
+- **Panel clades**: checked-in A2ML clades are also legacy; `just generate-clades` and its script are disabled. Reuse an existing compatible clade; a replacement format needs maintainer approval.
+- **Draft game-profile contract**: the JSON schema and `profile_contract.zig` are fixture/test-only, not a stable canonical format or production integration. Do not add a live adapter or expose session details without explicit policy decisions.
 - **VeriSimDB instances** are dedicated — never store GSA data in the VeriSimDB source repo
   - **Main** (port 8090, `GSA_VERISIMDB_URL`): server config, probe data, octads
   - **Backup** (port 8091, `GSA_BACKUP_VERISIMDB_URL`): game save metadata, snapshots, restore points
@@ -119,7 +125,8 @@ VeriSimDB (8-modality octads)      -- container/verisimdb/
 |------|-------|
 | AI manifest | `0-AI-MANIFEST.a2ml` (read FIRST) |
 | State checkpoint | `.machine_readable/descriptiles/STATE.a2ml` |
-| Game profiles | `profiles/*.a2ml` (18 games) |
+| Existing game profiles | `profiles/*.a2ml` (legacy corpus; do not extend) |
+| Draft contract + fixture | `schemas/game-profile-draft-0.1.schema.json`, `fixtures/standard-operating-psychopathy/` |
 | GUI panels | `src/gui/panels/` (8 panels) |
 | Panel clades | `panel-clades/` (9 base + game children) |
 | Ephapax core | `src/core/` (Shell, Bridge, Types, Capabilities) |

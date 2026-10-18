@@ -23,7 +23,7 @@ flowchart TD
     P4 -->|miss| P5{"⑤ TCP banner<br/>raw"}
     P5 -->|hit| ID
     P5 -->|miss| NONE["NoProtocolMatched"]
-    ID["Identify game<br/>(appid · folder · banner)"] --> CFG["Extract config<br/>→ A2ML with provenance"]
+    ID["Identify game<br/>(appid · folder · banner)"] --> CFG["Extract config<br/>→ legacy A2ML-compatible output"]
     CFG --> OCT["Optional: store octad<br/>→ VeriSimDB :8090"]
     OCT --> H["Return handle id (≥1000)"]
 
@@ -55,10 +55,18 @@ run real sockets against in-process mock servers (see
 
 ## Supported games (18)
 
-Each game ships an A2ML **profile** in `profiles/` declaring its ports, probe
-protocol, config format, fingerprint (Steam appid / executable), container
-actions, and a config schema. GSA supports **quoted and unquoted** attribute
-values in these profiles.
+The runtime registry currently loads the existing legacy `.a2ml` **profiles**
+in `profiles/` to describe ports, a probe protocol, config format, fingerprints,
+and action text. This is an implementation inventory, not a recommendation for
+new profiles: current `hyperpolymath/standards` guidance retires A2ML and says
+not to create, restore, regenerate, or extend it. Keep the existing corpus
+readable; no migration is claimed complete.
+
+The legacy parser records config-field metadata but does not provide a generic
+profile-schema validator for submitted settings. The current JSON validator is
+a draft, fixture-only test slice, not used by this registry, GUI, C ABI, or
+live server operations. See
+[`GAME-PROFILE-CONTRACT.adoc`](../developer/GAME-PROFILE-CONTRACT.adoc).
 
 | Game | Probe protocol | Config format |
 |---|---|---|
@@ -81,43 +89,38 @@ values in these profiles.
 | Valheim | A2S | env |
 | Void Expanse | custom | XML |
 
-> The table is generated from the real `profiles/*.a2ml` files. A2S covers the
-> majority; the "custom" rows are servers that don't answer a standard query
+> The table reflects the current legacy `profiles/*.a2ml` registry. A2S covers
+> the majority; the "custom" rows are servers that don't answer a standard query
 > protocol and are identified by a game-specific handshake or the known-port
-> table.
+> table. These profile entries do not imply that every deployment/action path
+> has been verified end to end.
 
-## What a profile looks like
+## Profile format and privacy boundary
 
-A profile is compact and declarative. Abridged Valheim:
+The existing `.a2ml` examples describe the legacy parser's input shape only;
+they are not a template for new files. The current parser continues to load
+those files for compatibility, but current standards prohibit extending A2ML.
+The new JSON descriptor is explicitly draft and fixture-only:
+[`schemas/game-profile-draft-0.1.schema.json`](../../schemas/game-profile-draft-0.1.schema.json)
+and the
+[SOP fixture](../../fixtures/standard-operating-psychopathy/profile.v0.1.json)
+exercise typed configuration, optional capabilities, and player/operator/secret
+visibility. It is not yet a production registry or adapter format.
 
-```
-@game-profile(id="valheim", name="Valheim", engine="Unity"):
-  @ports:
-    @port(name="query", number=2457, protocol="UDP"): Steam A2S query @end
-    @port(name="game",  number=2456, protocol="UDP"): Game traffic     @end
-  @end
-  @protocol(type="steam-query", variant="A2S"): … @end
-  @fingerprint:
-    @steam-appid(server=896660, client=892970) @end
-    @executable(name="valheim_server.x86_64") @end
-  @end
-  @config(format="env", path="/config/valheim/server.env"):
-    @field(key="SERVER_PASS", type="secret", label="Server Password"):
-      @constraint(min-length=5) @end
-    @end
-  @end
-  @actions: @action(id="restart"): podman restart -t 30 valheim @end … @end
-@end
-```
+The legacy A2ML emitter redacts config fields marked `secret` in that output.
+That limited behavior is not a session-data privacy policy and must not be
+assumed to sanitize hidden orders, negotiation, signals, or per-player fallback
+data. The fixture status projection includes only explicitly audience-labelled
+fields and omits secret fields from player and operator views; it does not
+implement authorization, persistence, or live diagnostics.
 
-Fields typed `secret` are **redacted to `[REDACTED]`** everywhere GSA emits them
-(A2ML output, octad JSON) — never printed, never stored in the clear.
+## Adding or migrating a game
 
-## Adding a game
-
-Drop a new `profiles/<game>.a2ml` following the shape above. See
-[`docs/developer/CONFIG-FORMATS.adoc`](../developer/CONFIG-FORMATS.adoc) for the
-config-format side and the README's "Adding a Game Profile" snippet for the
-minimum viable profile.
+Do not add a new `profiles/<game>.a2ml`. Keep the existing profiles unchanged
+until maintainers approve a versioned format and a reviewed mapping. The
+current draft and its limits are documented in
+[`GAME-PROFILE-CONTRACT.adoc`](../developer/GAME-PROFILE-CONTRACT.adoc), with
+open decisions and evidence in the
+[recon report](../reports/quality/2026-10-18-game-profile-recon.adoc).
 
 → Next: [The Proven ABI](05-The-Proven-ABI.md) · deploying? → [Deployment Topology](08-Deployment-Topology.md)

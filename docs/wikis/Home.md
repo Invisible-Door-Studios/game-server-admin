@@ -3,7 +3,7 @@
 
 # Game Server Admin — Wiki
 
-**GSA** is a universal game-server **probe**, **configuration manager**, and **administration** tool. Point it at a host and it fingerprints what game is running, extracts and version-tracks the server's config, and gives you a GUI (and CLI) to start/stop/restart/back-up the server — across 18 games and 8 config formats.
+**GSA** is a game-server discovery, configuration-management, and operations tool intended to remain game-neutral. It has protocol probes and a legacy registry covering 18 example profiles and 8 config formats; those examples do not establish a universal lifecycle, config-schema, or server API. A draft JSON config validator and status projection exist only as a fixture-tested slice, not a production integration. See [Probing & Games](04-Probing-and-Games.md) and the [draft profile contract](../developer/GAME-PROFILE-CONTRACT.adoc).
 
 > **Status: `0.9.0`, alpha.** The engine (probing, config extraction, the proven ABI, container ops) is real and tested (167 automated tests). The full GUI stack depends on sibling repos in the wider estate (see [Architecture](02-Architecture.md)), and a handful of v1.0 gates are still open. **Read [Installation](03-Installation.md) and [Troubleshooting](09-Troubleshooting.md) before you expect a one-click experience** — this page is honest about what works today.
 
@@ -49,7 +49,7 @@ GSA is deliberately the **client half** of a multi-repo ecosystem: it *orchestra
 
 ## The one-paragraph tour
 
-You give GSA a `host[:port]`. Its **probe engine** ([Probing & Games](04-Probing-and-Games.md)) tries A2S (Steam), Minecraft SLP, RCON, HTTP and a raw TCP banner in priority order, resolving DNS/IPv6 and honouring a per-probe timeout. On a hit it identifies the game, extracts the config (one of 8 formats) into **A2ML** with provenance, and can store an 8-modality *octad* in **VeriSimDB** for drift detection. Every value crossing the Zig↔Idris2 boundary rides a **machine-checked ABI contract** ([The Proven ABI](05-The-Proven-ABI.md)); every outbound HTTP call is a **declared capability** with an enforced deadline ([HTTP Capability Gateway](06-HTTP-Capability-Gateway.md)). Server lifecycle actions run through Podman/Docker/systemd, locally or over SSH — with the exec boundary hardened against injection.
+You give GSA a `host[:port]`. Its **probe engine** ([Probing & Games](04-Probing-and-Games.md)) tries implemented protocols such as A2S (Steam), Minecraft SLP, RCON, HTTP and a raw TCP banner, resolving DNS/IPv6 and honouring a per-probe timeout. Existing profile/container paths can return a legacy A2ML-compatible config representation; profile metadata is not a generic schema validator, and A2ML is not the format for new profiles. Optional storage paths use **VeriSimDB** for config/provenance-oriented records, not authoritative per-tick game state. Every value crossing the Zig↔Idris2 boundary rides a **machine-checked ABI contract** ([The Proven ABI](05-The-Proven-ABI.md)); outbound HTTP uses a **declared capability** with an enforced deadline ([HTTP Capability Gateway](06-HTTP-Capability-Gateway.md)). Server lifecycle and deployment operations remain game-/container-specific, not a universal GSA contract.
 
 ## Reference documentation
 

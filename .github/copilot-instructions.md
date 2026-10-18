@@ -6,8 +6,10 @@
 
 ## Before Writing Code
 
-- Read `0-AI-MANIFEST.a2ml` in the repo root for canonical file locations.
-- State files (.a2ml) live in `.machine_readable/` ONLY, never the root.
+- Read `0-AI-MANIFEST.a2ml` in the repo root for legacy repository context and file locations.
+- Existing state files (.a2ml) live in `.machine_readable/` ONLY, never the root; this is not permission to create or extend them.
+- Current `hyperpolymath/standards` policy retires A2ML: do not create, restore, regenerate, or extend `.a2ml`. Keep GSA's existing A2ML profiles readable; do not bulk-migrate them.
+- DEED is scoped to repository metadata and K9 to contracts; neither selects the game-profile format by itself. Treat `schemas/game-profile-draft-0.1.schema.json` and the SOP fixture as draft/test-only pending maintainer approval.
 
 ## License
 

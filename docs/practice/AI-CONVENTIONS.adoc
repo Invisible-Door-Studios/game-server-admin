@@ -19,11 +19,10 @@ Per-tool config files (.cursorrules, .clinerules, etc.) reference this document.
 
 ## License
 
-- All original code: **AGPL-3.0-or-later**
-- Fallback (platform-required only): MPL-2.0 with comment explaining why.
-- NEVER use AGPL-3.0.
+- Follow the artifact-class matrix in [`docs/legal/LICENSE-POLICY.adoc`](../legal/LICENSE-POLICY.adoc): code is **AGPL-3.0-or-later**, machine-readable metadata is **MPL-2.0**, and documentation is **CC-BY-SA-4.0**.
+- Never use AGPL-3.0 without the `-or-later` suffix.
 - Preserve third-party licenses verbatim.
-- Every source file needs `# SPDX-License-Identifier: CC-BY-SA-4.0`.
+- Every new file must carry the SPDX identifier for its artifact class.
 
 ## Author Attribution
 
@@ -33,10 +32,19 @@ Per-tool config files (.cursorrules, .clinerules, etc.) reference this document.
 
 ## State Files
 
-State/metadata files, anchors, and policies (.a2ml) belong in `.machine_readable/` ONLY.
+Existing state/metadata files and policies remain under `.machine_readable/` ONLY.
 NEVER create STATE.a2ml, META.a2ml, ECOSYSTEM.a2ml, AGENTIC.a2ml,
 NEUROSYM.a2ml, PLAYBOOK.a2ml, ANCHOR.a2ml, MAINTENANCE-AXES.a2ml,
 MAINTENANCE-CHECKLIST.a2ml, or SOFTWARE-DEVELOPMENT-APPROACH.a2ml in the repository root.
+
+## A2ML retirement and profile boundary
+
+Current `hyperpolymath/standards` guidance retires A2ML. Do not create, restore,
+regenerate, or extend `.a2ml` anywhere in the repository. Existing manifests,
+policies, and GSA game profiles remain compatibility inputs and are not to be
+rewritten wholesale. DEED is scoped to repository metadata and K9 to contracts;
+that does not select a canonical GSA game-profile format. The JSON profile
+schema and SOP fixture are draft/test-only pending maintainer approval.
 
 ## Banned Patterns
 

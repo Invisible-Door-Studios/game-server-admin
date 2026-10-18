@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:gsa:game-profile:0.1.0-draft",
+  "$comment": "SPDX-License-Identifier: MPL-2.0. Draft contract only; not the canonical GSA profile format until maintainer approval.",
+  "title": "GSA Game Profile Descriptor 0.1.0-draft",
+  "description": "A versioned, declarative profile/configuration contract. The Zig fixture validator supports the field subset described here; it does not execute deployment commands or connect to game servers.",
+  "type": "object",
+  "required": ["contract", "profile", "configuration"],
+  "properties": {
+    "$comment": { "type": "string" },
+    "contract": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "const": "gsa.game-profile" },
+        "version": { "const": "0.1.0-draft" }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string" },
+        "source": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "profile": {
+      "type": "object",
+      "required": ["id", "name", "kind"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+        "name": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "configuration": {
+      "type": "object",
+      "required": ["version", "fields"],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/field" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/capability" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "field": {
+      "type": "object",
+      "required": ["key", "type", "required", "visibility"],
+      "properties": {
+        "key": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$" },
+        "type": { "enum": ["string", "integer", "number", "boolean", "enum", "secret-ref"] },
+        "required": { "type": "boolean" },
+        "visibility": { "enum": ["player", "operator", "secret"] },
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "minimum": { "type": "number" },
+        "maximum": { "type": "number" },
+        "minLength": { "type": "integer", "minimum": 0 },
+        "maxLength": { "type": "integer", "minimum": 0 },
+        "description": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "enum" } }, "required": ["type"] },
+          "then": { "required": ["values"] },
+          "else": { "not": { "required": ["values"] } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "secret-ref" } }, "required": ["type"] },
+          "then": { "properties": { "visibility": { "const": "secret" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "integer" } }, "required": ["type"] },
+          "then": {
+            "properties": {
+              "minimum": { "type": "integer" },
+              "maximum": { "type": "integer" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "enum": ["integer", "number"] } }, "required": ["type"] },
+          "else": { "not": { "anyOf": [{ "required": ["minimum"] }, { "required": ["maximum"] }] } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "string" } }, "required": ["type"] },
+          "else": { "not": { "anyOf": [{ "required": ["minLength"] }, { "required": ["maxLength"] }] } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "capability": {
+      "type": "object",
+      "required": ["id", "version", "fields"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/field" }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
