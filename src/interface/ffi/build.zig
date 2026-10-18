@@ -9,6 +9,8 @@
 
 const std = @import("std");
 
+/// Configure library, CLI, benchmark, test, and cross-compilation build steps.
+/// Unit and fuzz test runs use the repository root to read checked-in fixtures.
 pub fn build(b: *std.Build) void {
     // ---------------------------------------------------------------
     // Default target / optimisation from CLI flags
@@ -99,6 +101,8 @@ pub fn build(b: *std.Build) void {
     });
 
     const run_unit_tests = b.addRunArtifact(unit_tests);
+    // Fixture-only tests read the checked-in SOP JSON fixtures at runtime.
+    run_unit_tests.setCwd(b.path("../../../"));
     const test_step = b.step("test", "Run unit tests for all FFI modules");
     test_step.dependOn(&run_unit_tests.step);
 
@@ -223,6 +227,8 @@ pub fn build(b: *std.Build) void {
     });
 
     const run_fuzz_tests = b.addRunArtifact(fuzz_tests);
+    // The import graph includes main.zig's fixture tests; run from the repository root.
+    run_fuzz_tests.setCwd(b.path("../../../"));
     const fuzz_step = b.step("fuzz", "Run config-parser fuzz harnesses (append --fuzz for continuous fuzzing)");
     fuzz_step.dependOn(&run_fuzz_tests.step);
 

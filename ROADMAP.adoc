@@ -2,26 +2,29 @@
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = Game Server Admin (GSA) Roadmap
 :author: Jonathan D.A. Jewell
-:revdate: 2026-07-07
+:revdate: 2026-10-18
 
 == Current State
 
-GSA is a universal game server probe, config management, and administration tool.
-96% complete (v0.9.0). Gossamer GUI + Zig FFI + Idris2 ABI + VeriSimDB backing store.
+GSA is a game-server discovery, configuration-management, and administration tool.
+Its existing 18-profile registry is a legacy compatibility inventory, not a
+universal server contract. 96% complete (v0.9.0). Gossamer GUI + Zig FFI + Idris2
+ABI + VeriSimDB backing store.
 
 Key capabilities delivered:
 
 * 40 exported FFI symbols (Zig 0.15.2, libgsa.so)
-* 13 FFI modules: lifecycle, probe, config_extract, a2ml_emit, verisimdb_client, server_actions, game_profiles, groove_client, steam_client, abi_layout, abi_serde, http_capability, cli
+* 14 Zig source modules, including `profile_contract.zig` (draft fixture validator; not a public FFI surface)
 * Protocol fingerprinting (8 protocols, 20+ known ports)
 * Config parsing (8 formats: XML, INI, JSON, ENV, YAML, TOML, Lua, KV)
-* 18 game profiles (A2ML files in profiles/)
+* 18 existing legacy game profiles (`profiles/*.a2ml`); current standards prohibit new A2ML profiles
+* Draft JSON profile/config validator and SOP design fixture (test-only; no live adapter, ABI, GUI, or deployment integration)
 * 8 Gossamer GUI panels + 9 panel clades
 * VeriSimDB on 2 ports (main 8090, backup 8091 for game saves)
-* A2ML serialisation, parsing, and config diff
+* Legacy A2ML serialisation, parsing, and config diff (compatibility path only; not a new profile contract)
 * Groove voice alerting via .well-known
 * Server actions via Podman/Docker/systemd
-* Secret redaction in A2ML output and octad JSON
+* Secret redaction for config fields marked secret in existing A2ML output; this is not a session-data privacy policy
 * Chainguard Wolfi containers with quadlets
 * Idris2 ABI with 18 result codes
 * Desktop entry and icon assets (SVG + PNG)
@@ -30,7 +33,7 @@ Key capabilities delivered:
 * CryoFall container stack (Containerfile, Quadlet, schema-driven provisioner, self-heal watchdog)
 * HTTP capability gateway (Phase 11) -- capability-scoped REST surface over the FFI
 * Illustrated wiki + reference docs (Phase 12)
-* AffineScript TEA interface (src/ui/tea/gsa_gui.affine) -- any-game admin surface over the libgsa FFI, profile-registry driven
+* AffineScript TEA interface (`src/ui/tea/gsa_gui.affine`) — profile-registry-driven admin UI over libgsa; the draft JSON validator is not wired into it
 
 Test suites:
 * Zig unit tests: 94, passing

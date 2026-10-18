@@ -60,7 +60,7 @@ profile.
 ```mermaid
 flowchart LR
     S1["① Select<br/>game profile"] --> S2["② Resolve Steam<br/>operator IDs"]
-    S2 --> S3["③ Configure<br/>(typed form from<br/>A2ML schema)"]
+    S2 --> S3["③ Configure<br/>(legacy profile form)"]
     S3 --> S4["④ Deployment target<br/>(host + SSH key)"]
     S4 --> S5["⑤ Stage game files<br/>(live terminal)"]
     S5 --> S6["⑥ Provision<br/>(live terminal)"]
@@ -73,7 +73,7 @@ flowchart LR
 |---|---|---|
 | 1. Select game profile | `list_profiles` | pick one of the 18 games |
 | 2. Resolve operator IDs | `steam_resolve_vanity` (per slot) | vanity URL → SteamID64; `steam_player_info` for names |
-| 3. Configure server | *(profile schema)* | form is generated from the profile's `@config` fields; secrets are masked |
+| 3. Configure server | legacy profile metadata | legacy form path; the generic draft JSON validator is fixture-only and is not wired into the wizard |
 | 4. Deployment target | — | host + SSH key for the remote |
 | 5. Stage game files | `nexus_stage_files` | live terminal output (SteamCMD etc.) |
 | 6. Provision | `nexus_provision` | live terminal output |

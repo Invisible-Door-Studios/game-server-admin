@@ -184,10 +184,10 @@ legitimately retry) rather than failing the whole operation.
 | Change | Layer(s) to touch | Contract to re-verify
 | New `Result` code | `Types.idr` (add variant + every total function over `Result`) | Regenerate `result_codes_expected.zig` (`scripts/gen_result_codes.zig`); `main.zig`'s comptime block will refuse to build until `GsaResult` matches
 | New/changed wire struct field | `Types.idr` + `Layout.idr` (layout + `NoOverlap`/`AllFieldsAligned`/`SizeAligned` proofs) | Regenerate `abi_layout_expected.zig` (`scripts/gen_abi_expected.zig`); `abi_layout.zig`'s comptime block cross-checks the Zig `extern struct`; update the offset readers in `abi_serde.zig`
-| New probe protocol | `ProbeProtocol` variant in `Types.idr` + implementation in `probe.zig` | Behavioral test in `zig build test-integration`; update any `profiles/*.a2ml` that reference it
+| New probe protocol | `ProbeProtocol` variant in `Types.idr` + implementation in `probe.zig` | Behavioral test in `zig build test-integration`; do not extend legacy A2ML profiles—an approved mapping or migration is needed before profile-level adoption
 | New config format | `ConfigFormat` variant in `Types.idr` + `parseXYZ` in `config_extract.zig` | Follow `docs/developer/CONFIG-FORMATS.adoc`: detection test, parse test, fuzz harness coverage via `parseAuto`
-| New game profile | `profiles/<id>.a2ml` (18 exist today) | `panel-clades/gsa-game-<id>/` if the game needs UI beyond the generic panels; no ABI change needed — profiles are data, not wire structs
-| New GUI panel | `src/gui/panels/` (or `panels/`) + `panel-clades/` | `0-AI-MANIFEST.a2ml` / Shell/Bridge `.eph` wiring so the panel is reachable over `gossamer://`
+| New game profile | Draft JSON contract/fixture under `schemas/` and `fixtures/` (not runtime-loaded) | Current standards prohibit new A2ML; canonical format, ownership, and any legacy mapping require maintainer approval before production use
+| New GUI panel | `src/gui/panels/` (or `panels/`) + an existing compatible panel clade | Wire the manifest and Shell/Bridge `.eph` so the panel is reachable over `gossamer://`; do not add A2ML clades, and seek maintainer approval if a replacement clade format is needed
 | New exported FFI function | `pub export fn gossamer_gsa_*` in the owning `src/interface/ffi/src/*.zig` module | Add it to `main.zig`'s comptime linker-hint list (otherwise the linker dead-strips it) + a `Foreign.idr` wrapper if Idris2 callers need it
 | New VeriSimDB modality/query | `verisimdb_client.zig` | Update `ServerOctad` in `Types.idr`/`Layout.idr` only if the wire shape changes; otherwise this is engine-only
 |===

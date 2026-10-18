@@ -1,1 +1,6 @@
-= reports Unit
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+= Reports
+
+Reports are grouped by discipline. The current quality/recon proposal is
+link:quality/2026-10-18-game-profile-recon.adoc[here].

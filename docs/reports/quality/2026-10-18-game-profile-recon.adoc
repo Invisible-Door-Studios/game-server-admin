@@ -1,0 +1,139 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+= Recon: Flexible Game-Profile Contract
+:revdate: 2026-10-18
+:status: proposal, not an accepted contract
+
+== Scope and evidence
+
+Recon performed against GSA `1fae2e3` (the active branch base), the current
+repository instructions and CI, and the current `hyperpolymath/standards`
+main-branch instructions. The external game repository was inspected as a
+design test case only; this is not evidence of a live server integration.
+
+=== Instructions, standards, initialization
+
+* `0-AI-MANIFEST.a2ml`, `.claude/CLAUDE.md`, and
+  `.github/copilot-instructions.md` direct contributors to the current source
+  tree and describe the existing A2ML profile implementation. Their profile
+  authoring instructions predate the current standards policy. The panel-clade
+  guide and `scripts/generate-clades.sh` also describe/generate A2ML clades;
+  this change disables that generator and documents existing clades as legacy,
+  without rewriting the checked-in clade corpus.
+* The current standards instruction (`hyperpolymath/standards/.claude/CLAUDE.md`,
+  owner rulings D99/D269c/D312/D313) says A2ML is retired: do not create,
+  restore, regenerate, or extend `.a2ml` files. Existing files are legacy
+  awaiting migration; do not bulk-convert them. DEED is for repository
+  metadata, not a substitute game-profile format. No game-profile migration
+  mapping was found in the standards repository.
+* `REQUIRES_INITIALISATION.md` remains an active marker: it reports nine
+  unfilled substitution tokens across eight files (alternate email, conduct
+  team/response SLA, PGP-key URL, project classification/purpose/strength, and
+  container image version). These require maintainer facts or decisions and
+  are unrelated to this change; the marker must remain.
+* There are no open GSA issues or pull requests. Issue #103 is closed. At the
+  branch-base SHA, Cross-Platform Build & Test and ABI Contract passed on
+  2026-10-11. Governance failed in `Workflow security linter` at
+  `Check locked or SHA-pinned actions` and in `Allowlist Preflight` at
+  `Run tree allowlist preflight check`; GitHub Pages failed at `Build
+  casket-ssg`. Step names are available from run metadata; Governance log
+  retrieval returned EOF from GitHub's log host and Pages logs were not found.
+  The `Actions Lockfile` run
+  `38205062417` (2026-10-12) and latest Hypatia Security Scan run
+  `39083691766` (2026-10-18) both reported `startup_failure`; no jobs/logs were
+  available for those runs. No causes are inferred. These are existing CI
+  observations, not profile-contract test results.
+
+=== Existing implementation versus claims
+
+* `src/interface/ffi/src/game_profiles.zig` loads `.a2ml` files from the
+  supplied profile directory and parses profile identity, ports, one protocol,
+  config fields, and action text. It records `@constraint` and `@options`
+  metadata, but there is no general validator applying those declarations to
+  submitted configuration values. The exported `gossamer_gsa_add_profile`
+  still accepts A2ML text at runtime; it is now documented as a legacy
+  compatibility path, not a supported authoring route. The `just add-profile`
+  file scaffold is disabled so it cannot create new A2ML files.
+* The Idris `ValidGameProfile` proof checks a non-empty ID, port bounds, and
+  at least one config field; it does not prove that settings satisfy a
+  game-specific schema. `Foreign.idr` documents `applyConfig` as unsupported
+  until a typed serializer/write/read-back path exists. The native
+  `gossamer_gsa_write_server_config` path is a CryoFall-specific XML writer,
+  not a generic profile-driven validator. The `validate-config` server action
+  delegates to a container script and is not profile-schema validation.
+* Secret redaction exists in the A2ML emitter for fields marked secret.
+  There is no game-session data contract, authorization boundary, or session
+  privacy/retention policy in GSA. The GUI and FFI must not be treated as
+  evidence that private session diagnostics are safely exposed.
+* `schemas/config.cue` is an unreferenced generic `{name, replicas, port,
+  env}` schema; no build, test, or CI path uses it. It does not model game
+  profiles or validate live configuration.
+* Barotrauma demonstrates Steam A2S plus XML configuration and lifecycle
+  commands. Project Zomboid demonstrates a UDP port range plus Steam query,
+  INI configuration, mods, and pause-empty settings. CryoFall demonstrates a
+  custom Automaton protocol, UDP ports 6000/6001, XML configuration, and
+  game-specific provisioning. These are distinct profile shapes, not a
+  universal taxonomy.
+
+=== Test-game evidence and boundary
+
+The inspected STANDARD OPERATING PSYCHOPATHY repository currently describes a
+browser-based, single-player bunker simulation with local browser persistence.
+Its checked-in client code is not a multiplayer dedicated server and exposes
+no server admin API or versioned server contract. The requested 4–6-player,
+co-op/competitive/co-opetitive and crisis-phase directions are therefore
+fixture inputs supplied for design exploration, not implemented runtime
+facts. Elixir, Rust/SNIF, Bevy, and UMS remain outside GSA; UMS package/profile
+identifiers may be recorded as opaque compatibility references, but GSA must
+not author or compile game content.
+
+== Smallest useful change proposed
+
+Add an explicitly **draft, fixture-only, versioned JSON profile/config
+contract** alongside the existing legacy A2ML reader. It should validate
+profile-declared fields and their typed values, permit optional namespaced
+capabilities with independent versions, and tolerate unknown capabilities
+without interpreting them. Use the SOP fixture to exercise game-owned
+configuration (modes, 4–6 capacity, pacing, the user-specified non-binding
+signal/hidden-simultaneous-commitment settings, and opaque deadline,
+world-advance, no-response/disconnect fallback identifiers, plus UMS
+package/profile/scenario compatibility references) without assigning
+production defaults or timer values. This slice
+does not define a deployment-instance contract; any future instance contract
+must be independently versioned from the profile and session summary. A mock
+status projection should be marked `fixture`, remain coarse, filter secret
+fields, and omit hidden orders, negotiation, deception signals, and per-player
+fallback decisions.
+
+Keep `profiles/*.a2ml` and the existing registry behavior untouched in this
+stage. The migration path is compatibility-first: legacy profiles remain
+readable; new declarative fixtures use the draft JSON boundary; no existing
+profile is rewritten. A later, maintainer-approved mapping and compatibility
+test can migrate profiles individually. No A2ML converter, game adapter,
+server API, operational persistence, or runtime dependency is proposed here.
+
+== Decisions for maintainer input before a stable contract or migration
+
+. Approve the profile serialization/schema technology and its canonical
+  location (the draft below uses JSON and a narrow JSON-Schema subset; CUE is
+  present but currently unused).
+. Decide ownership and independent versioning/boundaries for profile,
+  deployment-instance, configuration, and optional session contracts; this
+  slice defines no deployment-instance contract.
+. Decide whether and when the existing A2ML profile corpus should migrate,
+  who owns a game-profile mapping, and whether the legacy runtime
+  `gossamer_gsa_add_profile` endpoint can be retired without breaking ABI
+  consumers; the standards migration rules prohibit silently adding facts to
+  legacy files.
+. The game owner must settle allowed policy identifiers and semantics for
+  timers, pauses, reconnects, and missing/disconnected/timed-out players. This
+  proposal supplies no operational defaults or final timer values.
+. Decide what UMS compatibility identifiers mean and which component validates
+  package compatibility; GSA only records references.
+. Before any live-session endpoint, decide authorization, sensitivity,
+  retention, and audit requirements. The fixture is not an authenticated
+  diagnostic API, and the proposed ordinary view excludes secret and
+  per-player data.
+. A real protocol, port, install/update method, lifecycle adapter, and backup
+  behavior require evidence from a game-owned server contract; none is inferred
+  from this client-only fixture.

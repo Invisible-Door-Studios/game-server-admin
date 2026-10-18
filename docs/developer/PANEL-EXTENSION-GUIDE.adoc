@@ -34,7 +34,7 @@ The eight current panels, all under `src/gui/panels/`:
 |===
 | Panel | Purpose
 | `server-browser`    | Discover, fingerprint, and manage game servers
-| `config-editor`     | A2ML-aware config editor with type validation
+| `config-editor`     | Legacy profile-driven config editor; draft JSON validation is fixture-only
 | `server-actions`    | Start/stop/restart/logs actions
 | `live-logs`         | Streaming log viewer
 | `health-dashboard`  | VeriSimDB health + drift overview
@@ -129,13 +129,18 @@ the whole service is allowed to request.
 
 === 4. The clade — `panel-clades/<clade-id>/`
 
-Every panel has a matching clade directory with two files: an A2ML clade
-manifest and a `config.k9.ncl` "kennel" config. Verified from
-`panel-clades/gsa-browser/`:
+Existing panels have matching clade directories containing an A2ML clade
+manifest and a `config.k9.ncl` "kennel" config. The example below documents
+that legacy structure as it exists in `panel-clades/gsa-browser/`; it is not a
+new-clade authoring recipe. Current standards retire A2ML: do not create,
+restore, regenerate, or extend these descriptors. Reuse an existing clade only
+when it fits; if a new clade contract is necessary, pause for maintainer
+approval of a replacement format and compatibility path before authoring.
+The draft game-profile JSON contract is not a clade format.
 
 `GsaBrowser.a2ml` (`# SPDX-License-Identifier: MPL-2.0` — note this is a
-*different* license to the panel's own AGPL-3.0-or-later, since the clade
-file is project metadata, not shipped panel code):
+*different* license to the panel's own AGPL-3.0-or-later, since the existing
+clade file is project metadata, not shipped panel code):
 
 [source,toml]
 ----
@@ -311,11 +316,11 @@ verify each step:
   `data_sources` map (`nexus-setup`'s own steam/nexus URIs were **not**
   added here — only `gossamer://gsa/profiles` was already present — so check
   this against what your panel actually calls, don't assume it is covered).
-. *Add a clade*: `panel-clades/<clade-id>/<ClradeId>.a2ml` (MPL-2.0 header,
-  `inherits-from = "gsa"`, `clade-fli.fli-inherits` naming the FLI modules
-  the panel needs) and `panel-clades/<clade-id>/config.k9.ncl` (pedigree,
-  panel, wiring, and obligations blocks, all four `requires_*` obligations
-  `true`).
+. *Check the clade contract*: reuse an existing clade only if it accurately
+  describes the panel. Do not create, restore, regenerate, or extend an A2ML
+  clade descriptor; the old `generate-clades` target is disabled. If a new
+  clade is required, stop for maintainer approval of a replacement format and
+  migration/compatibility path. The draft game-profile JSON is not that format.
 . *Wire the FFI calls it needs*: for each `gossamerInvoke(command, …)` call
   in the panel's `panel.html`, add a `Bridge.eph` handler function
   (`handle<Thing>`, calling the relevant `gossamer_gsa_*` export — see
@@ -337,10 +342,12 @@ verify each step:
 SPDX::
 Shipped panel code (`panel.html`, `.eph` files, `panel.json`'s `license`
 field, and `panels/manifest.json`'s top-level `spdx` field) is
-`AGPL-3.0-or-later`. Clade governance files (`panel-clades/**/*.a2ml`,
+`AGPL-3.0-or-later`. Existing clade governance files (`panel-clades/**/*.a2ml`,
 `config.k9.ncl`) are `MPL-2.0` — a deliberately different license for
-project/build metadata versus shipped GUI code. `panels/manifest.json` is
-explicitly machine-readable metadata for the panel registry.
+project/build metadata versus shipped GUI code. This license note does not
+authorize creating or extending retired A2ML descriptors.
+`panels/manifest.json` is explicitly machine-readable metadata for the panel
+registry.
 
 Version SSOT::
 `panel.json`'s `"version"` field and `panels/manifest.json`'s

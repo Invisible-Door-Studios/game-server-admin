@@ -10,14 +10,19 @@ ____
 
 == Overview
 
-*Universal game server probe, configuration management, and
-administration* — built on Gossamer (linearly-typed webview shell) with
-VeriSimDB (8-modality database) underpinning.
+*Game-server discovery, configuration management, and administration* — built
+on Gossamer (linearly-typed webview shell) and backed by VeriSimDB. GSA aims
+to remain game-neutral; the current 18-profile registry is a legacy
+compatibility inventory, not a universal server contract.
 
-GSA can attach to _any_ game server, fingerprint it via protocol
-probing, extract its configuration into A2ML format, and provide a rich
-GUI for viewing, editing, and tracking config changes with full
-provenance.
+GSA provides a set of protocol probes, a legacy registry of game profiles,
+configuration extraction/editing paths, and a GUI. The current registry still
+loads the existing `profiles/*.a2ml` corpus for compatibility; A2ML is retired
+by the current standards and is not a format for new profiles. A draft,
+versioned JSON profile/config validator now exists only as a fixture-tested
+slice; it is not wired into the GUI, public ABI, deployment path, or a live
+game adapter. See `docs/developer/GAME-PROFILE-CONTRACT.adoc` for the boundary
+and open maintainer decisions.
 
 *New in this version:* User-configurable server connections with support
 for default servers and favorites list. See Configuration for details.
@@ -49,7 +54,7 @@ for default servers and favorites list. See Configuration for details.
 |Server Browser |inspector |Discover/fingerprint servers, add to
 management
 
-|Config Editor |editor |A2ML-aware form generation with type validation
+|Config Editor |editor |Legacy profile-backed config forms; the draft generic validator is fixture-only and not wired into the GUI
 
 |Server Actions |terminal |Start/stop/restart with confirmation
 
@@ -63,9 +68,9 @@ management
 configs
 |===
 
-All panels are registered in the PanLL Clade system with full
-inheritance. The cladogram grows automatically as new game profiles are
-added.
+All panels are registered in the PanLL Clade system with inheritance. The
+existing game-profile clades correspond to the legacy profile corpus; the
+fixture-only JSON contract does not generate production profiles or clades.
 
 === Supported Games (Initial)
 
@@ -114,23 +119,27 @@ Environment variables: `+GSA_VERISIMDB_URL+` (default
 http://localhost:8090[`+http://localhost:8090+`]), `+GSA_PROFILES_DIR+`
 (default `+./profiles+`).
 
-== Adding a Game Profile
+== Game Profiles and the Compatibility Boundary
 
-Create a new `+.a2ml+` file in `+profiles/+`:
+The runtime registry still loads the existing `+profiles/*.a2ml+` corpus.
+Those files are a legacy dependency: do not create, restore, regenerate, or
+extend A2ML profiles, and do not bulk-rewrite the existing corpus. The registry
+has not yet been migrated to a new canonical profile format.
 
-....
-@game-profile(id="my-game", name="My Game", engine="custom"):
-  @ports(query=27015, game=27016):@end
-  @protocol(type="steam-query", version="a2s"):@end
-  @config(format="json", path="/config/server.json"):
-    @field(key="name", type="string", label="Server Name"):@end
-  @end
-  @clade(inherits="gsa-game", kind="game-profile"):@end
-@end
-....
+A draft JSON descriptor and field validator are available at
+`+schemas/game-profile-draft-0.1.schema.json+` and
+`+src/interface/ffi/src/profile_contract.zig+`. The SOP example under
+`+fixtures/standard-operating-psychopathy/+` is synthetic design data, not a
+live server contract. The validator is currently exercised only by Zig tests;
+it is not connected to the production registry, C ABI, GUI, deployment actions,
+or a real adapter. It cannot establish server reachability or operational
+status.
 
-Then run `+just+` `+generate-clades+` — the cladogram updates
-automatically.
+Before a stable contract or migration, maintainers must decide the canonical
+serialization/schema, versioning and ownership, the mapping for legacy
+profiles, and any session-data authorization/retention/audit requirements.
+See `+docs/developer/GAME-PROFILE-CONTRACT.adoc+` and the
+`+docs/reports/quality/2026-10-18-game-profile-recon.adoc+` recon report.
 
 == ABI/FFI Standard
 
@@ -148,7 +157,7 @@ Each managed server is a VeriSimDB octad with all 8 modalities:
 * *Vector:* config embedding for similarity search
 * *Tensor:* performance metrics over time
 * *Semantic:* game type, version, mods, status
-* *Document:* full config text (A2ML, full-text indexed)
+* *Document:* existing legacy config representation (A2ML output; not a new canonical contract)
 * *Temporal:* every config version with timestamp
 * *Provenance:* who changed what, when, why (hash-chain)
 * *Spatial:* datacenter geolocation

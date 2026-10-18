@@ -110,8 +110,11 @@ GitHub Actions must be **SHA-pinned**. Details in
 - Keep PRs focused — one concern per PR makes review (and the ABI gate) tractable.
 - CI must be green: the six test suites + the ABI contract + version-drift +
   security scans.
-- Adding a game? Just drop a `profiles/<game>.a2ml` — see
-  [Probing & Games](04-Probing-and-Games.md#adding-a-game).
+- Adding a game? Do not create a new `.a2ml` profile. The existing registry is
+  legacy and unchanged; the JSON profile validator is still draft/test-only.
+  See [Probing & Games](04-Probing-and-Games.md#adding-or-migrating-a-game) and
+  [`GAME-PROFILE-CONTRACT.adoc`](../developer/GAME-PROFILE-CONTRACT.adoc) for
+  the boundary and maintainer decisions.
 - Adding a GUI panel? Follow
   [`docs/developer/PANEL-EXTENSION-GUIDE.adoc`](../developer/PANEL-EXTENSION-GUIDE.adoc).
 

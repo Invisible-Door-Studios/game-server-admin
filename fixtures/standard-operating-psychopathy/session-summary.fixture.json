@@ -1,0 +1,15 @@
+{
+  "$comment": "SPDX-License-Identifier: MPL-2.0",
+  "source": "fixture",
+  "connected": false,
+  "capability_id": "gsa.session-summary",
+  "capability_version": "0.1.0-draft",
+  "data": {
+    "phase_id": "fixture.phase.unresolved",
+    "player_count": 4,
+    "uptime_seconds": 0,
+    "health_summary": "fixture-only; no live server connection",
+    "compatibility_version": "fixture.compatibility.unresolved",
+    "package_version": "fixture-package.unresolved"
+  }
+}

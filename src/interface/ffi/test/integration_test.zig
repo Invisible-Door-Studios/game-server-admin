@@ -21,6 +21,10 @@ const verisimdb_client = gsa.verisimdb_client;
 const server_actions = gsa.server_actions;
 const game_profiles = gsa.game_profiles;
 
+test {
+    _ = @import("profile_contract_test.zig");
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. Result code mapping — all 18 values match Idris2 ABI
 // ═══════════════════════════════════════════════════════════════════════════════

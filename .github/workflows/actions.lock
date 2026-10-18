@@ -7,8 +7,8 @@ workflows:
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
     '.github/workflows/actions-lock.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
-        - 'step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1'
+        - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
+        - 'step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25'
     '.github/workflows/boj-build.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
     '.github/workflows/casket-pages.yml':
@@ -19,7 +19,7 @@ workflows:
         - 'actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9'
     '.github/workflows/codeql.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
+        - 'github/codeql-action@24c54180a607b1449ed407dd24f251e4e9147c8d'
     '.github/workflows/cross-platform.yml':
         - 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
@@ -31,29 +31,29 @@ workflows:
     '.github/workflows/hypatia-scan.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
-        - 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
+        - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         - 'erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124'
-        - 'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
+        - 'github/codeql-action@24c54180a607b1449ed407dd24f251e4e9147c8d'
     '.github/workflows/instant-sync.yml': []
     '.github/workflows/label-triage.yml': []
     '.github/workflows/labels.yml': []
     '.github/workflows/mirror.yml': []
     '.github/workflows/push-email-notify.yml':
-        - 'hyperpolymath/smtp-notify-action@22e7bdb322c430c1d0dac6b3bb307f4bb139d0be'
+        - 'hyperpolymath/smtp-notify-action@c1c9fa07992a02c1fd3d67a0dc1b08cccb852aef'
     '.github/workflows/release.yml':
         - 'actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8'
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c'
-        - 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
-        - 'step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1'
+        - 'actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333'
+        - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
+        - 'step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25'
     '.github/workflows/rhodibot.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
     '.github/workflows/scorecard.yml': []
     '.github/workflows/secret-scanner.yml': []
     '.github/workflows/static-analysis-gate.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c'
-        - 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
+        - 'actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333'
+        - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         - 'erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124'
 dependencies:
     'actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8':
@@ -88,9 +88,9 @@ dependencies:
         commit: 'sha1-368f82528645a54fb793d4d04e342629a3f51346'
         owner_id: 44036562
         repo_id: 438112499
-    'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c':
-        ref: 'v8.0.1'
-        commit: 'sha1-3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c'
+    'actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333':
+        ref: 'v8.0.2'
+        commit: 'sha1-9000827ccba6bdab643e8b6fd33ac0654aef8333'
         owner_id: 44036562
         repo_id: 192626254
     'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3':
@@ -98,14 +98,14 @@ dependencies:
         commit: 'sha1-3a2844b7e9c422d3c10d287c895573f7108da1b3'
         owner_id: 44036562
         repo_id: 205262760
-    'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a':
-        ref: 'v7.0.1'
-        commit: 'sha1-043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
-        owner_id: 44036562
-        repo_id: 192625955
     'actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f':
         ref: 'v7.0.0'
         commit: 'sha1-bbbca2ddaa5d8feaa63e36b76fdaad77386f024f'
+        owner_id: 44036562
+        repo_id: 192625955
+    'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9':
+        ref: 'v7.0.2'
+        commit: 'sha1-cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         owner_id: 44036562
         repo_id: 192625955
     'actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9':
@@ -120,9 +120,9 @@ dependencies:
         commit: 'sha1-54075bcc5e249e4758d363f27d099f55d843f124'
         owner_id: 47606891
         repo_id: 331103973
-    'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2':
-        ref: 'v4.38.2'
-        commit: 'sha1-2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
+    'github/codeql-action@24c54180a607b1449ed407dd24f251e4e9147c8d':
+        ref: 'v4.38.3'
+        commit: 'sha1-24c54180a607b1449ed407dd24f251e4e9147c8d'
         owner_id: 9919
         repo_id: 259445878
     'hyperpolymath/deed-ecosystem@3e69929a4b0b5610b477732ee125a156cbc8a040':
@@ -135,13 +135,13 @@ dependencies:
         commit: 'sha1-20f6be5b5a14a48680b236955b5c4ad9033d00d4'
         owner_id: 6759885
         repo_id: 1275650185
-    'hyperpolymath/smtp-notify-action@22e7bdb322c430c1d0dac6b3bb307f4bb139d0be':
-        ref: 'v0.3.0'
-        commit: 'sha1-22e7bdb322c430c1d0dac6b3bb307f4bb139d0be'
+    'hyperpolymath/smtp-notify-action@c1c9fa07992a02c1fd3d67a0dc1b08cccb852aef':
+        ref: 'v0.5.0'
+        commit: 'sha1-c1c9fa07992a02c1fd3d67a0dc1b08cccb852aef'
         owner_id: 6759885
         repo_id: 1352485172
-    'step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1':
-        ref: 'v2.21.1'
-        commit: 'sha1-e14015d583714f6e62063499dc959a02595150a1'
+    'step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25':
+        ref: 'v2.22.1'
+        commit: 'sha1-ccd8616d44fd3846e67624a50d5aad6d37bf2d25'
         owner_id: 88700172
         repo_id: 422287306

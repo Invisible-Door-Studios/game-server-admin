@@ -245,7 +245,7 @@ pub fn cmd_list_profiles() -> String / IO {
   gossamer_gsa_list_profiles()
 }
 
-// Register a new game profile from A2ML source at runtime.
+// Legacy A2ML profile-registration wrapper; do not use for new profile authoring.
 pub fn cmd_add_profile(a2ml: String) -> Int / IO {
   gossamer_gsa_add_profile(a2ml)
 }

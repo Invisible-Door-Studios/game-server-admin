@@ -26,7 +26,7 @@ _You run and administer game servers via the Gossamer GUI and the `gsa` CLI._
 | `docs/wikis/Home.md` | live | **Illustrated wiki** — narrative tour with Mermaid diagrams; start here
 | `docs/wikis/03-Installation.md` | live | Honest install guide: what works today, exact prereqs, verify steps
 | `docs/wikis/07-GUI-and-Nexus-Setup.md` | live | All 8 panels + the 7-step `nexus-setup` provisioning wizard (was undocumented)
-| `docs/wikis/04-Probing-and-Games.md` | live | Probe pipeline + the 18-game profile/protocol/format table
+| `docs/wikis/04-Probing-and-Games.md` | live | Probe pipeline + 18-game legacy registry table and the draft-profile boundary
 | `docs/wikis/09-Troubleshooting.md` | live | Symptom → cause → fix for the common first-run failures
 | Admin workflows | *thin* | Covered piecewise in the wiki (server-actions, config-history); a single end-to-end runbook is still a gap
 |===
@@ -38,16 +38,17 @@ _You build GSA, extend it, or contribute code across the Gossamer GUI → Zig FF
 |===
 | Document | Status | Covers
 
-| `README.adoc` | live | Architecture diagram, module map, "Adding a Game Profile" snippet
+| `README.adoc` | live | Architecture, compatibility boundary, CLI reference, supported-game inventory
 | `docs/developer/ABI-FFI-README.adoc` | live | Idris2 ABI + Zig FFI standard; C/Idris2/Rust/Julia examples (strong)
 | `TOPOLOGY.md` | live | System architecture + data flow
 | `docs/decisions/` | live | Architecture decision records (RSR adoption)
 | `docs/developer/FFI-MODULE-REFERENCE.adoc` | live | Per-module docs for the FFI modules (every `gossamer_gsa_*` symbol, the 18 result codes, the handle lifecycle)
+| `docs/developer/GAME-PROFILE-CONTRACT.adoc` | draft | Versioned JSON profile/config validator and fixture-only status slice; no production adapter
 | `docs/developer/PANEL-EXTENSION-GUIDE.adoc` | live | Panel anatomy + the clade system; `nexus-setup` as the worked example; the `host.html` wiring points
 | `docs/wikis/05-The-Proven-ABI.md` | live | The machine-checked ABI contract (codegen pipeline, 18 codes, linear handles) — the differentiator, illustrated
 | `docs/wikis/06-HTTP-Capability-Gateway.md` | live | How outbound HTTP is a declared, deadline-bounded, default-deny capability
 | `docs/wikis/10-Contributing.md` | live | Build/test, the ABI regen rule, conventions, tri-license SPDX, branch/PR flow
-| Game-profile authoring | *thin* | See `docs/wikis/04-Probing-and-Games.md`; a deep field-type/validation/debugging guide is still a gap
+| Game-profile authoring | *draft* | See `GAME-PROFILE-CONTRACT.adoc`; existing A2ML registry remains legacy and the new validator is test-only
 | `docs/developer/CONFIG-FORMATS.adoc` | live | The 8 formats, detection order, `addField` invariants, YAML scope, and how to add a parser
 | `docs/developer/ARCHITECTURE-RATIONALE.adoc` | live | Why Ephapax / Idris2 / Zig / VeriSimDB; when to touch each layer
 |===
@@ -61,6 +62,7 @@ _You release, run CI/CD, operate containers, and manage governance + security sc
 
 | `docs/governance/MAINTENANCE-CHECKLIST.adoc` | live | Three-axis model, hygiene, ABI purity, panic-attack (strong)
 | `docs/architecture/THREAT-MODEL.adoc` | live | STRIDE, assets, trust boundaries, mitigations
+| `docs/reports/quality/2026-10-18-game-profile-recon.adoc` | proposal | Standards conflict, implementation evidence, CI snapshot, open maintainer decisions
 | `docs/DEPLOYMENT-RUNBOOK.adoc` | live | Build, container, VeriSimDB main+backup, health, backup/restore
 | `SECURITY.md` | live | Vulnerability reporting
 | `docs/maintainer/RELEASE-CHECKLIST.adoc` | live | CI gates (6 suites + ABI contract), version/license/docs gates, manual gates, tag steps
@@ -97,7 +99,7 @@ above. Start at `docs/wikis/Home.md`; it links every page.
 | `Home.md` | Landing page + ecosystem diagram + navigation
 | `02-Architecture.md` | The four layers, data-flow sequence, graceful degradation
 | `03-Installation.md` | Honest install guide (what works today)
-| `04-Probing-and-Games.md` | Probe pipeline + the 18-game table
+| `04-Probing-and-Games.md` | Probe pipeline + 18-game legacy registry and draft-profile boundary
 | `05-The-Proven-ABI.md` | The machine-checked ABI contract (the differentiator)
 | `06-HTTP-Capability-Gateway.md` | Outbound HTTP as a declared, deadline-bounded capability
 | `07-GUI-and-Nexus-Setup.md` | The 8 panels + the 7-step provisioning wizard

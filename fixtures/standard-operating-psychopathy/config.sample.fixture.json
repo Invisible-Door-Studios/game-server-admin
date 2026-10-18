@@ -1,0 +1,20 @@
+{
+  "$comment": "SPDX-License-Identifier: MPL-2.0",
+  "source": "fixture",
+  "connected": false,
+  "data": {
+    "mode": "co-opetitive",
+    "player_capacity": 4,
+    "pacing": "hybrid",
+    "signal_binding": "non-binding",
+    "commitment_mode": "simultaneous-hidden",
+    "deadline_policy_id": "fixture.deadline.unresolved",
+    "world_advance_policy_id": "fixture.world-advance.unresolved",
+    "no_response_fallback_id": "fixture.no-response.unresolved",
+    "disconnect_fallback_id": "fixture.disconnect.unresolved",
+    "ums_package_id": "urn:fixture:ums:package:sop",
+    "ums_profile_id": "urn:fixture:ums:profile:sop-coopetitive",
+    "scenario_version": "fixture.scenario.0",
+    "ums_compatibility_version": "fixture.compatibility.unresolved"
+  }
+}

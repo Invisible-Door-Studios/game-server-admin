@@ -530,7 +530,9 @@ pub export fn gossamer_gsa_list_profiles() callconv(.c) [*:0]const u8 {
     return &list_profiles_buf;
 }
 
-/// Add a profile from an A2ML string (not a file path).
+/// Legacy profile-registration endpoint accepting an A2ML string (not a file path).
+/// Kept for compatibility; current standards retire A2ML, so new profile authoring
+/// must use an approved future contract rather than this endpoint.
 ///
 /// Returns 0 on success, negative error code on failure.
 pub export fn gossamer_gsa_add_profile(
