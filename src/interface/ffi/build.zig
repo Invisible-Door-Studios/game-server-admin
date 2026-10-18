@@ -225,6 +225,8 @@ pub fn build(b: *std.Build) void {
     });
 
     const run_fuzz_tests = b.addRunArtifact(fuzz_tests);
+    // The import graph includes main.zig's fixture tests; run from the repository root.
+    run_fuzz_tests.setCwd(b.path("../../../"));
     const fuzz_step = b.step("fuzz", "Run config-parser fuzz harnesses (append --fuzz for continuous fuzzing)");
     fuzz_step.dependOn(&run_fuzz_tests.step);
 
