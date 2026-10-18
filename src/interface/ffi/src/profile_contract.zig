@@ -40,6 +40,7 @@ pub const StatusView = struct {
     capability_version: []const u8,
     fields: []const StatusField,
 
+    /// Release the view's allocations, invalidating its fields and copied strings.
     pub fn deinit(self: *StatusView) void {
         self.arena.deinit();
     }
@@ -48,6 +49,7 @@ pub const StatusView = struct {
 pub const ProfileDocument = struct {
     parsed: std.json.Parsed(JsonValue),
 
+    /// Release the parsed document and invalidate all values borrowed from it.
     pub fn deinit(self: *ProfileDocument) void {
         self.parsed.deinit();
     }
@@ -56,6 +58,11 @@ pub const ProfileDocument = struct {
 /// Parse and check the draft descriptor's structural contract. Unknown
 /// capability IDs are intentionally accepted, but their generic field
 /// declarations must still use the supported, typed field subset.
+/// The returned document owns its parsed values independently of input; release
+/// its allocations with ProfileDocument.deinit.
+/// Propagates JSON parsing/allocation errors and descriptor validation errors:
+/// InvalidProfileDescriptor, UnknownDescriptorField, UnsupportedProfileContract,
+/// InvalidFieldDefinition, DuplicateField, or DuplicateCapability.
 pub fn parseProfile(allocator: Allocator, input: []const u8) !ProfileDocument {
     var parsed = try std.json.parseFromSlice(JsonValue, allocator, input, .{});
     errdefer parsed.deinit();
@@ -65,6 +72,14 @@ pub fn parseProfile(allocator: Allocator, input: []const u8) !ProfileDocument {
 
 /// Validate a configuration JSON object against a profile's declared fields.
 /// Errors are static and never include submitted values (which may be secrets).
+/// Use a profile returned by parseProfile. Rejects unknown keys and missing
+/// required fields; optional fields are not filled in. Numeric bounds are
+/// inclusive, and string lengths count Unicode code points. Secret references
+/// require nonempty provider/id strings and do not resolve or fetch secrets.
+/// Propagates JSON parsing/allocation errors and field validation errors:
+/// InvalidConfiguration, UnknownConfigurationField, MissingRequiredField,
+/// TypeMismatch, InvalidValue, or ValueOutOfRange. Missing profile configuration
+/// or fields yields InvalidProfileDescriptor.
 pub fn validateConfiguration(
     allocator: Allocator,
     profile: *const ProfileDocument,
@@ -77,7 +92,14 @@ pub fn validateConfiguration(
     try validateObjectAgainstFields(fields, parsed.value);
 }
 
-/// Validate a fixture envelope without pretending it is deployment input.
+/// Validate data against a parsed profile's configuration fields inside an
+/// envelope requiring source "fixture" and connected false. Accepts an optional
+/// string $comment; unknown envelope keys yield UnknownDescriptorField.
+/// Non-object envelopes, missing members, or mistyped $comment/source yield
+/// InvalidFixtureConfiguration;
+/// another source or a connected value other than false yields
+/// NotFixtureConfiguration. Propagates JSON parsing/allocation errors and the
+/// profile/field validation errors described by validateConfiguration.
 pub fn validateFixtureConfiguration(
     allocator: Allocator,
     profile: *const ProfileDocument,
@@ -103,6 +125,17 @@ pub fn validateFixtureConfiguration(
 /// adapter. Player views contain only player-visible fields; operator views
 /// may additionally contain operator-visible fields. Secret fields are never
 /// copied to either audience.
+/// Use a profile returned by parseProfile. All data is validated before
+/// filtering, including hidden fields; absent optional fields are omitted.
+/// Returned fields follow descriptor order and remain valid independently of
+/// input and profile. Release the returned allocations with StatusView.deinit.
+/// Non-object envelopes, missing members, or mistyped $comment/source/capability
+/// identifiers yield InvalidFixtureStatus. Another source or a connected value
+/// other than false yields NotFixtureStatus.
+/// Unknown envelope keys yield UnknownDescriptorField. An unadvertised
+/// capability yields CapabilityNotAdvertised; its version must match exactly
+/// or CapabilityVersionMismatch is returned. JSON parsing/allocation and
+/// profile/field validation errors propagate, including errors in hidden data.
 pub fn projectFixtureStatus(
     allocator: Allocator,
     profile: *const ProfileDocument,
@@ -158,6 +191,10 @@ pub fn projectFixtureStatus(
     };
 }
 
+/// Check the supported draft contract, profile metadata, and field declarations.
+/// Unknown keys yield UnknownDescriptorField; malformed structure yields
+/// InvalidProfileDescriptor. Contract mismatches yield UnsupportedProfileContract,
+/// duplicate capability IDs yield DuplicateCapability, and field errors propagate.
 fn validateProfileDescriptor(root: JsonValue) !void {
     if (root != .object) return error.InvalidProfileDescriptor;
     try requireOnlyKeys(root, &.{ "$comment", "contract", "metadata", "profile", "configuration", "capabilities" });
@@ -212,6 +249,10 @@ fn validateProfileDescriptor(root: JsonValue) !void {
     }
 }
 
+/// Check unique field keys, supported types/visibility, and applicable constraints.
+/// Non-arrays yield InvalidProfileDescriptor, unknown keys yield
+/// UnknownDescriptorField, duplicate keys yield DuplicateField, and malformed
+/// or incompatible declarations yield InvalidFieldDefinition.
 fn validateFieldArray(fields: JsonValue) !void {
     if (fields != .array) return error.InvalidProfileDescriptor;
     for (fields.array.items, 0..) |field, index| {
@@ -277,6 +318,11 @@ fn validateFieldArray(fields: JsonValue) !void {
     }
 }
 
+/// Validate an object against previously validated field declarations.
+/// Reject unknown keys and invalid supplied values before checking required fields.
+/// Non-object data or non-array fields yield InvalidConfiguration; unknown keys
+/// and absent required fields yield UnknownConfigurationField and
+/// MissingRequiredField. Field validation errors propagate.
 fn validateObjectAgainstFields(fields: JsonValue, value: JsonValue) !void {
     if (fields != .array or value != .object) return error.InvalidConfiguration;
 
@@ -294,6 +340,10 @@ fn validateObjectAgainstFields(fields: JsonValue, value: JsonValue) !void {
     }
 }
 
+/// Check a value against a validated field declaration, including inclusive bounds.
+/// Return TypeMismatch for incompatible types, ValueOutOfRange for exceeded
+/// bounds, and InvalidValue for invalid enum, UTF-8, or secret-reference values.
+/// Missing or unsupported field types yield InvalidFieldDefinition.
 fn validateFieldValue(field: JsonValue, value: JsonValue) !void {
     const kind_text = stringMember(field, "type") orelse return error.InvalidFieldDefinition;
     const kind = parseFieldKind(kind_text) orelse return error.InvalidFieldDefinition;
@@ -326,6 +376,8 @@ fn validateFieldValue(field: JsonValue, value: JsonValue) !void {
     }
 }
 
+/// Require an object with only nonempty provider/id strings; otherwise InvalidValue.
+/// The reference is opaque: no provider lookup or secret retrieval occurs.
 fn validateSecretReference(value: JsonValue) !void {
     if (value != .object or value.object.count() != 2) return error.InvalidValue;
     const provider = stringMember(value, "provider") orelse return error.InvalidValue;
@@ -334,6 +386,9 @@ fn validateSecretReference(value: JsonValue) !void {
     try requireOnlyKeys(value, &.{ "provider", "id" });
 }
 
+/// Check inclusive minLength/maxLength bounds from a validated string field.
+/// Count Unicode code points; invalid UTF-8 yields InvalidValue and a violated
+/// bound yields ValueOutOfRange.
 fn validateStringLength(field: JsonValue, value: []const u8) !void {
     const length = std.unicode.utf8CountCodepoints(value) catch return error.InvalidValue;
     if (member(field, "minLength")) |minimum| {
@@ -344,6 +399,7 @@ fn validateStringLength(field: JsonValue, value: []const u8) !void {
     }
 }
 
+/// Return the first field with an exact key match, or null if none exists.
 fn findField(fields: JsonValue, key: []const u8) ?JsonValue {
     if (fields != .array) return null;
     for (fields.array.items) |field| {
@@ -353,6 +409,7 @@ fn findField(fields: JsonValue, key: []const u8) ?JsonValue {
     return null;
 }
 
+/// Return the first capability with an exact ID match, or null if absent.
 fn findCapability(root: JsonValue, capability_id: []const u8) ?JsonValue {
     const capabilities = member(root, "capabilities") orelse return null;
     if (capabilities != .array) return null;
@@ -363,26 +420,32 @@ fn findCapability(root: JsonValue, capability_id: []const u8) ?JsonValue {
     return null;
 }
 
+/// Borrow the profile ID string, or return null if missing or mistyped.
 fn profileId(root: JsonValue) ?[]const u8 {
     const profile = member(root, "profile") orelse return null;
     return stringMember(profile, "id");
 }
 
+/// Return an object member, or null for a missing key or non-object value.
 fn member(value: JsonValue, key: []const u8) ?JsonValue {
     if (value != .object) return null;
     return value.object.get(key);
 }
 
+/// Return an object member, or MissingMember for a missing key or non-object.
 fn requiredMember(value: JsonValue, key: []const u8) !JsonValue {
     return member(value, key) orelse error.MissingMember;
 }
 
+/// Borrow an object member string, or return null if missing or mistyped.
 fn stringMember(value: JsonValue, key: []const u8) ?[]const u8 {
     const found = member(value, key) orelse return null;
     if (found != .string) return null;
     return found.string;
 }
 
+/// Reject keys outside allowed with UnknownDescriptorField; allowed keys may be absent.
+/// Non-object values yield InvalidProfileDescriptor.
 fn requireOnlyKeys(value: JsonValue, allowed: []const []const u8) !void {
     if (value != .object) return error.InvalidProfileDescriptor;
     var iterator = value.object.iterator();
@@ -395,6 +458,7 @@ fn requireOnlyKeys(value: JsonValue, allowed: []const []const u8) !void {
     }
 }
 
+/// Recognize supported descriptor type names, or return null for unknown names.
 fn parseFieldKind(value: []const u8) ?FieldKind {
     if (std.mem.eql(u8, value, "string")) return .string;
     if (std.mem.eql(u8, value, "integer")) return .integer;
@@ -405,6 +469,7 @@ fn parseFieldKind(value: []const u8) ?FieldKind {
     return null;
 }
 
+/// Recognize player, operator, or secret visibility, or return null.
 fn parseVisibility(value: []const u8) ?Visibility {
     if (std.mem.eql(u8, value, "player")) return .player;
     if (std.mem.eql(u8, value, "operator")) return .operator;
@@ -412,6 +477,7 @@ fn parseVisibility(value: []const u8) ?Visibility {
     return null;
 }
 
+/// Allow player fields for both audiences and operator fields only for operators.
 fn isVisible(visibility: Visibility, audience: Audience) bool {
     return switch (audience) {
         .player => visibility == .player,
@@ -419,6 +485,8 @@ fn isVisible(visibility: Visibility, audience: Audience) bool {
     };
 }
 
+/// Return an i64 for JSON integers or finite integral floats in [-2^63, 2^63).
+/// Return null for other values or numbers outside that range.
 fn integerValue(value: JsonValue) ?i64 {
     return switch (value) {
         .integer => |integer| integer,
@@ -431,6 +499,8 @@ fn integerValue(value: JsonValue) ?i64 {
     };
 }
 
+/// Convert JSON integers or floats to a finite f64, or return null.
+/// Large integers may lose precision during conversion.
 fn numberValue(value: JsonValue) ?f64 {
     const number = switch (value) {
         .integer => |integer| @as(f64, @floatFromInt(integer)),
@@ -441,6 +511,9 @@ fn numberValue(value: JsonValue) ?f64 {
     return number;
 }
 
+/// Copy a value already validated for kind, allocating only for strings/enums.
+/// The caller owns any copied string. Propagate allocation errors; secret
+/// references or unrepresentable numbers yield UnsupportedVisibleValue.
 fn copyVisibleValue(allocator: Allocator, kind: FieldKind, value: JsonValue) !VisibleValue {
     return switch (kind) {
         .integer => .{ .integer = integerValue(value) orelse return error.UnsupportedVisibleValue },
@@ -451,6 +524,7 @@ fn copyVisibleValue(allocator: Allocator, kind: FieldKind, value: JsonValue) !Vi
     };
 }
 
+/// Accept 1–128 ASCII characters: an alphanumeric followed by alphanumerics, _ or -.
 fn isProfileId(value: []const u8) bool {
     if (value.len == 0 or value.len > 128 or !std.ascii.isAlphanumeric(value[0])) return false;
     for (value[1..]) |char| {
@@ -459,6 +533,7 @@ fn isProfileId(value: []const u8) bool {
     return true;
 }
 
+/// Accept 1–128 ASCII characters: a letter followed by alphanumerics, _, . or -.
 fn isFieldKey(value: []const u8) bool {
     if (value.len == 0 or value.len > 128 or !std.ascii.isAlphabetic(value[0])) return false;
     for (value[1..]) |char| {
